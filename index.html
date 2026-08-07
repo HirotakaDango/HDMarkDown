@@ -31,6 +31,36 @@
         --text-muted: #94a3b8;
       }
 
+      /* Global Scrollbar Styles (Firefox) */
+      * {
+        scrollbar-width: thin;
+        scrollbar-color: var(--border-color) var(--bg-surface);
+      }
+
+      /* Global Webkit Scrollbar Customization */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: var(--bg-pitch);
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background-color: var(--border-color);
+        border-radius: 4px;
+        border: 2px solid var(--bg-pitch);
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background-color: var(--accent-color);
+      }
+
+      ::-webkit-scrollbar-corner {
+        background: var(--bg-pitch);
+      }
+
       html,
       body {
         height: 100%;
@@ -157,7 +187,8 @@
         white-space: nowrap;
         -webkit-overflow-scrolling: touch;
         touch-action: pan-x;
-        scrollbar-width: none;
+        scrollbar-width: thin;
+        scrollbar-color: var(--border-color) transparent;
         display: flex;
         align-items: center;
         min-height: 48px;
@@ -170,7 +201,7 @@
       }
 
       .toolbar-bar::-webkit-scrollbar {
-        display: none;
+        height: 4px;
       }
 
       .toolbar-bar::-webkit-scrollbar-thumb {
@@ -261,17 +292,29 @@
         background-color: var(--accent-color);
       }
 
-      /* Custom Scrollbars */
+      /* Custom Panes & Textarea Scrollbars */
       .pane::-webkit-scrollbar,
-      .file-sidebar::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
+      .file-sidebar::-webkit-scrollbar,
+      #editor::-webkit-scrollbar,
+      .offcanvas-body::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
       }
 
       .pane::-webkit-scrollbar-thumb,
-      .file-sidebar::-webkit-scrollbar-thumb {
+      .file-sidebar::-webkit-scrollbar-thumb,
+      #editor::-webkit-scrollbar-thumb,
+      .offcanvas-body::-webkit-scrollbar-thumb {
         background: var(--border-color);
-        border-radius: 3px;
+        border-radius: 4px;
+        border: 2px solid var(--bg-surface);
+      }
+
+      .pane::-webkit-scrollbar-thumb:hover,
+      .file-sidebar::-webkit-scrollbar-thumb:hover,
+      #editor::-webkit-scrollbar-thumb:hover,
+      .offcanvas-body::-webkit-scrollbar-thumb:hover {
+        background: var(--accent-color);
       }
 
       /* Rendered Markdown Styling */
@@ -318,6 +361,40 @@
         max-width: 100%;
         height: auto;
         border-radius: 8px;
+      }
+
+      /* Responsive Video Container for YouTube & Embeds */
+      .video-container {
+        position: relative;
+        padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+        height: 0;
+        overflow: hidden;
+        max-width: 100%;
+        background: #000;
+        margin: 1.5rem 0;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+      }
+
+      .video-container iframe,
+      .video-container object,
+      .video-container embed,
+      .video-container video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: 0;
+        border-radius: 8px;
+      }
+
+      .preview-pane video {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        margin: 1rem 0;
+        background: #000;
       }
 
       /* Responsive View Modes */
@@ -489,6 +566,8 @@
         <div class="vr mx-1 opacity-25"></div>
         <button class="toolbar-btn" onclick="insertSyntax('link')" title="Link"><i class="bi bi-link-45deg"></i></button>
         <button class="toolbar-btn" onclick="insertSyntax('image')" title="Image"><i class="bi bi-image"></i></button>
+        <button class="toolbar-btn" onclick="insertSyntax('youtube')" title="YouTube Video"><i class="bi bi-youtube"></i></button>
+        <button class="toolbar-btn" onclick="insertSyntax('video')" title="HTML5 Video"><i class="bi bi-film"></i></button>
         <button class="toolbar-btn" onclick="insertSyntax('table')" title="Table"><i class="bi bi-table"></i></button>
         <div class="vr mx-1 opacity-25"></div>
         <button class="toolbar-btn" onclick="insertSyntax('ul')" title="Unordered List"><i class="bi bi-list-ul"></i></button>
@@ -600,6 +679,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.8/purify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script>
+      // Configure DOMPurify to allow embedded frames and videos
+      DOMPurify.addHook('uponSanitizeElement', (node, data) => {
+        if (data.tagName === 'iframe') {
+          const src = node.getAttribute('src') || '';
+          if (!src.startsWith('https://www.youtube.com/') && !src.startsWith('https://www.youtube-nocookie.com/')) {
+            node.parentNode.removeChild(node);
+          }
+        }
+      });
+
       // OPFS Storage Controller
       class StorageEngine {
         static async getRoot() {
@@ -674,6 +763,19 @@
 
 A modern **Markdown Live Workspace** built with pitch dark theme, local **OPFS** file storage, **Find & Replace**, **Undo/Redo**, and **JSON Import/Export**.
 
+## Media Embedding Support
+
+### YouTube Video
+<div class="video-container">
+  <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
+
+### HTML5 Native Video
+<video controls width="100%">
+  <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
 ## Features
 - **OPFS Engine**: Handles large document structures locally inside origin private storage.
 - **Multiple Files**: Manage all your markdown notes seamlessly from the sidebar.
@@ -692,6 +794,7 @@ async function loadStorage() {
 | Undo & Redo | ✅ |
 | Find & Replace | ✅ |
 | Import/Export JSON | ✅ |
+| YouTube & Video | ✅ |
 `;
 
       // Global App State
@@ -729,6 +832,35 @@ async function loadStorage() {
           }).value;
         }
       });
+
+      // Custom YouTube Embed Parser extension for markdown syntax `![youtube](VIDEO_ID)`
+      const youtubeExtension = {
+        name: 'youtube',
+        level: 'inline',
+        start(src) { return src.indexOf('![youtube]('); },
+        tokenizer(src, tokens) {
+          const rule = /^!\[youtube\]\(([^)]+)\)/;
+          const match = rule.exec(src);
+          if (match) {
+            return {
+              type: 'youtube',
+              raw: match[0],
+              id: match[1].trim()
+            };
+          }
+        },
+        renderer(token) {
+          let videoId = token.id;
+          if (videoId.includes('v=')) {
+            videoId = videoId.split('v=')[1].split('&')[0];
+          } else if (videoId.includes('youtu.be/')) {
+            videoId = videoId.split('youtu.be/')[1].split('?')[0];
+          }
+          return `<div class="video-container"><iframe src="https://www.youtube.com/embed/${videoId}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+        }
+      };
+
+      marked.use({ extensions: [youtubeExtension] });
 
       // Push State to History Stack
       function pushHistory(val) {
@@ -768,7 +900,11 @@ async function loadStorage() {
       // Render Live Preview
       function renderMarkdown() {
         const markdownText = editor.value;
-        const cleanHTML = DOMPurify.sanitize(marked.parse(markdownText));
+        const rawHTML = marked.parse(markdownText);
+        const cleanHTML = DOMPurify.sanitize(rawHTML, {
+          ADD_TAGS: ['iframe', 'video', 'source'],
+          ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling', 'src', 'controls', 'type', 'width', 'height', 'title']
+        });
         preview.innerHTML = cleanHTML;
         preview.querySelectorAll('pre code').forEach((block) => {
           hljs.highlightElement(block);
@@ -1084,6 +1220,16 @@ async function loadStorage() {
             after = ')';
             placeholder = 'https://via.placeholder.com/150';
             break;
+          case 'youtube':
+            before = '![youtube](';
+            after = ')';
+            placeholder = 'dQw4w9WgXcQ';
+            break;
+          case 'video':
+            before = '\n<video controls width="100%">\n  <source src="';
+            after = '" type="video/mp4">\n</video>\n';
+            placeholder = 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4';
+            break;
           case 'ul':
             before = '- ';
             placeholder = 'List item';
@@ -1305,6 +1451,8 @@ async function loadStorage() {
     blockquote { border-left: 4px solid #6366f1; margin: 0; padding-left: 1rem; color: #94a3b8; }
     table { border-collapse: collapse; width: 100%; }
     th, td { border: 1px solid #222938; padding: 8px; }
+    .video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; background: #000; margin: 1.5rem 0; border-radius: 8px; }
+    .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
   </style>
 </head>
 <body>
