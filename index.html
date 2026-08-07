@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HDMarkDown - Professional Markdown Workspace</title>
+    <link rel="icon" type="image/svg" href="https://icons.getbootstrap.com/assets/icons/markdown-fill.svg">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="HDMarkDown - Professional Markdown Workspace">
+    <meta property="og:description" content="A modern Markdown Live Workspace built with local OPFS file storage, live preview, find & replace, and export capabilities.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://icons.getbootstrap.com/assets/icons/markdown-fill.svg">
+    <meta property="og:url" id="og-url" content="">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Highlight.js Deep Dark Theme -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css" rel="stylesheet">
+    <style>
+      :root {
+        --bg-pitch: #080a0f;
+        --bg-surface: #10141d;
+        --bg-surface-elevated: #181d2a;
+        --border-color: #222938;
+        --accent-color: #6366f1;
+        --accent-hover: #4f46e5;
+        --text-main: #f1f5f9;
+        --text-muted: #94a3b8;
+      }
+
+      html,
+      body {
+        height: 100%;
+        background-color: var(--bg-pitch);
+        color: var(--text-main);
+        overflow: hidden;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+
+      .app-container {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        height: 100dvh;
+      }
+
+      /* Global Button Centering Fix */
+      .btn,
+      .toolbar-btn {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        vertical-align: middle;
+        line-height: 1;
+      }
+
+      /* Navbar Customization */
+      .app-header {
+        background-color: var(--bg-surface);
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      #active-file-title {
+        max-width: 180px;
+        transition: all 0.2s ease;
+      }
+
+      #active-file-title:focus {
+        background-color: var(--bg-surface-elevated) !important;
+        box-shadow: 0 0 0 1px var(--accent-color);
+      }
+
+      /* Sidebar Styling & Collapsed State */
+      .file-sidebar {
+        background-color: var(--bg-surface);
+        border-right: 1px solid var(--border-color);
+        width: 260px;
+        display: flex;
+        flex-direction: column;
+        transition: width 0.2s ease, padding 0.2s ease;
+      }
+
+      .file-sidebar.collapsed {
+        width: 50px !important;
+        padding: 0.5rem 0.25rem !important;
+      }
+
+      .file-sidebar.collapsed .sidebar-hide-on-collapse {
+        display: none !important;
+      }
+
+      .file-sidebar.collapsed .file-item {
+        justify-content: center !important;
+        padding: 0.5rem 0 !important;
+      }
+
+      .file-sidebar.collapsed .file-item span.text-truncate {
+        max-width: 100% !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100% !important;
+      }
+
+      .file-sidebar.collapsed .file-item span.text-truncate i {
+        margin-right: 0 !important;
+      }
+
+      .file-sidebar.collapsed .file-item-actions {
+        display: none !important;
+      }
+
+      .file-item {
+        padding: 0.5rem 0.8rem;
+        border-radius: 6px;
+        color: var(--text-muted);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: all 0.15s ease;
+        font-size: 0.9rem;
+        text-decoration: none;
+      }
+
+      .file-item:hover {
+        background-color: var(--bg-surface-elevated);
+        color: var(--text-main);
+      }
+
+      .file-item.active {
+        background-color: rgba(99, 102, 241, 0.15);
+        color: var(--accent-color);
+        font-weight: 600;
+      }
+
+      .file-item .file-item-actions {
+        opacity: 0;
+        transition: opacity 0.15s ease;
+        display: flex;
+        gap: 0.4rem;
+      }
+
+      .file-item:hover .file-item-actions {
+        opacity: 1;
+      }
+
+      /* Mobile Formatting Toolbar */
+      .toolbar-bar {
+        background-color: var(--bg-surface);
+        border-bottom: 1px solid var(--border-color);
+        overflow-x: auto;
+        overflow-y: hidden;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-x;
+        scrollbar-width: none;
+        display: flex;
+        align-items: center;
+        min-height: 48px;
+        padding-top: 0.35rem !important;
+        padding-bottom: 0.35rem !important;
+      }
+
+      .toolbar-bar>* {
+        flex-shrink: 0;
+      }
+
+      .toolbar-bar::-webkit-scrollbar {
+        display: none;
+      }
+
+      .toolbar-bar::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 3px;
+      }
+
+      .toolbar-btn {
+        border: none;
+        background: transparent;
+        color: var(--text-muted);
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        border-radius: 6px;
+        transition: all 0.15s ease;
+        font-size: 1rem;
+      }
+
+      .toolbar-btn:hover {
+        background-color: var(--bg-surface-elevated);
+        color: var(--accent-color);
+      }
+
+      .toolbar-btn:active {
+        background-color: var(--bg-surface-elevated);
+        color: var(--accent-color);
+        transform: scale(0.92);
+      }
+
+      .find-replace-bar {
+        background-color: var(--bg-surface-elevated);
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      /* Main Workspace Layout */
+      .workspace {
+        flex: 1;
+        display: flex;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .pane {
+        height: 100%;
+        overflow-y: auto;
+      }
+
+      .editor-pane {
+        display: flex;
+        flex-direction: column;
+        background-color: var(--bg-pitch);
+        width: 50%;
+      }
+
+      #editor {
+        width: 100%;
+        height: 100%;
+        border: none;
+        outline: none;
+        resize: none;
+        padding: 1rem;
+        font-family: 'JetBrains Mono', 'Fira Code', 'SFMono-Regular', Consolas, monospace;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        background-color: transparent;
+        color: var(--text-main);
+      }
+
+      .preview-pane {
+        padding: 1.5rem;
+        background-color: var(--bg-pitch);
+        color: var(--text-main);
+        flex: 1;
+      }
+
+      /* Resizable Splitter Handle */
+      .resizer {
+        width: 5px;
+        background-color: var(--border-color);
+        cursor: col-resize;
+        transition: background-color 0.2s ease;
+        z-index: 10;
+        flex-shrink: 0;
+      }
+
+      .resizer:hover, .resizer.resizing {
+        background-color: var(--accent-color);
+      }
+
+      /* Custom Scrollbars */
+      .pane::-webkit-scrollbar,
+      .file-sidebar::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+
+      .pane::-webkit-scrollbar-thumb,
+      .file-sidebar::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 3px;
+      }
+
+      /* Rendered Markdown Styling */
+      .preview-pane h1,
+      .preview-pane h2,
+      .preview-pane h3 {
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 0.3em;
+        margin-top: 1.5em;
+        margin-bottom: 1em;
+      }
+
+      .preview-pane table {
+        width: 100%;
+        margin-bottom: 1rem;
+        border-collapse: collapse;
+      }
+
+      .preview-pane table,
+      .preview-pane th,
+      .preview-pane td {
+        border: 1px solid var(--border-color);
+        padding: 0.5rem 0.75rem;
+      }
+
+      .preview-pane th {
+        background-color: var(--bg-surface);
+      }
+
+      .preview-pane blockquote {
+        border-left: 4px solid var(--accent-color);
+        padding-left: 1rem;
+        margin-left: 0;
+        color: var(--text-muted);
+      }
+
+      .preview-pane pre code {
+        border-radius: 8px;
+        padding: 1.2rem !important;
+        background-color: var(--bg-surface) !important;
+      }
+
+      .preview-pane img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+      }
+
+      /* Responsive View Modes */
+      .view-mode-split .editor-pane {
+        display: flex;
+      }
+
+      .view-mode-split .preview-pane {
+        display: block;
+      }
+
+      .view-mode-split .resizer {
+        display: block;
+      }
+
+      .view-mode-edit .editor-pane {
+        display: flex;
+        width: 100% !important;
+      }
+
+      .view-mode-edit .preview-pane,
+      .view-mode-edit .resizer {
+        display: none !important;
+      }
+
+      .view-mode-preview .editor-pane,
+      .view-mode-preview .resizer {
+        display: none !important;
+      }
+
+      .view-mode-preview .preview-pane {
+        display: block;
+        width: 100% !important;
+      }
+
+      /* Desktop view rules */
+      @media (min-width: 769px) {
+        #mobileSidebar {
+          display: none !important;
+        }
+      }
+
+      /* Mobile Breakpoints & UI Tweaks */
+      @media (max-width: 768px) {
+        .desktop-sidebar {
+          display: none !important;
+        }
+
+        .resizer {
+          display: none !important;
+        }
+
+        .editor-pane {
+          width: 100% !important;
+        }
+
+        .view-mode-split .editor-pane {
+          display: flex;
+          width: 100% !important;
+        }
+
+        .view-mode-split .preview-pane {
+          display: none;
+        }
+
+        .preview-pane {
+          padding: 1rem;
+        }
+      }
+
+      @media (max-width: 576px) {
+        .app-header {
+          padding-left: 0.5rem !important;
+          padding-right: 0.5rem !important;
+        }
+
+        #active-file-title {
+          max-width: 110px !important;
+          font-size: 0.85rem;
+        }
+
+        .toolbar-btn {
+          width: 38px;
+          height: 38px;
+          font-size: 1.1rem;
+        }
+
+        #editor {
+          padding: 0.85rem;
+          font-size: 0.9rem;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Hidden File Input for JSON Import -->
+    <input type="file" id="import-json-input" accept=".json" class="d-none">
+    <div class="app-container">
+      <!-- Navbar Header -->
+      <header class="app-header px-2 px-sm-3 py-2">
+        <div class="d-flex align-items-center justify-content-between gap-1 gap-sm-2">
+          <!-- Left Section -->
+          <div class="d-flex align-items-center gap-1 gap-sm-2 text-truncate me-auto">
+            <!-- Unified Sidebar Toggle Button (Handles both Desktop collapse & Mobile offcanvas) -->
+            <button class="btn btn-sm btn-outline-secondary p-1 border-0 me-1" id="btn-toggle-sidebar" title="Toggle Sidebar">
+              <i class="bi bi-folder2-open fs-5"></i>
+            </button>
+            <!-- App Brand -->
+            <span class="fw-bold d-flex align-items-center gap-1 gap-sm-2 text-light flex-shrink-0">
+              <i class="bi bi-markdown-fill" style="color: var(--accent-color);"></i>
+              <span class="d-none d-sm-inline">HDMarkDown</span>
+            </span>
+            <span class="text-muted opacity-50 d-none d-sm-inline">/</span>
+            <!-- Active File Name Input -->
+            <input type="text" id="active-file-title" class="form-control form-control-sm border-0 bg-transparent text-light fw-medium px-1 px-sm-2" value="untitled.md" title="Rename active document">
+          </div>
+          <!-- Right Section: View Mode Switches & Data Dropdown -->
+          <div class="d-flex align-items-center gap-1 gap-sm-2 flex-shrink-0">
+            <!-- View Modes -->
+            <div class="btn-group btn-group-sm" role="group" aria-label="View Modes">
+              <button type="button" class="btn btn-outline-secondary px-2" id="btn-mode-edit" title="Editor Only">
+                <i class="bi bi-pencil-fill"></i>
+              </button>
+              <button type="button" class="btn btn-outline-secondary px-2 d-none d-sm-inline-block" id="btn-mode-split" title="Toggle Split View">
+                <i class="bi bi-columns"></i>
+              </button>
+              <button type="button" class="btn btn-outline-secondary px-2" id="btn-mode-preview" title="Preview Only">
+                <i class="bi bi-eye-fill"></i>
+              </button>
+            </div>
+            <!-- Import / Export Dropdown -->
+            <div class="dropdown">
+              <button class="btn btn-sm btn-outline-secondary dropdown-toggle px-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-arrow-down-up"></i> <span class="d-none d-sm-inline ms-1">Data</span>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end bg-dark border-secondary shadow">
+                <li><a class="dropdown-item text-light d-flex align-items-center gap-2" href="#" id="import-json-btn"><i class="bi bi-upload"></i> Import JSON Notes</a></li>
+                <li><a class="dropdown-item text-light d-flex align-items-center gap-2" href="#" id="export-json-btn"><i class="bi bi-filetype-json"></i> Export JSON Notes</a></li>
+                <li>
+                  <hr class="dropdown-divider border-secondary">
+                </li>
+                <li><a class="dropdown-item text-light d-flex align-items-center gap-2" href="#" id="export-md"><i class="bi bi-filetype-md"></i> Download .md</a></li>
+                <li><a class="dropdown-item text-light d-flex align-items-center gap-2" href="#" id="export-html"><i class="bi bi-filetype-html"></i> Download .html</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Markdown Formatting Toolbar -->
+      <div class="toolbar-bar px-2 px-sm-3 py-1 gap-1 fs-6">
+        <button class="toolbar-btn" id="btn-undo" onclick="undo()" title="Undo (Ctrl+Z)"><i class="bi bi-arrow-counterclockwise"></i></button>
+        <button class="toolbar-btn" id="btn-redo" onclick="redo()" title="Redo (Ctrl+Y)"><i class="bi bi-arrow-clockwise"></i></button>
+        <div class="vr mx-1 opacity-25"></div>
+        <button class="toolbar-btn" onclick="toggleFindReplaceBar()" title="Find & Replace (Ctrl+F)"><i class="bi bi-search"></i></button>
+        <div class="vr mx-1 opacity-25"></div>
+        <button class="toolbar-btn" onclick="insertSyntax('bold')" title="Bold"><i class="bi bi-type-bold"></i></button>
+        <button class="toolbar-btn" onclick="insertSyntax('italic')" title="Italic"><i class="bi bi-type-italic"></i></button>
+        <button class="toolbar-btn" onclick="insertSyntax('strikethrough')" title="Strikethrough"><i class="bi bi-type-strikethrough"></i></button>
+        <div class="vr mx-1 opacity-25"></div>
+        <button class="toolbar-btn" onclick="insertSyntax('h1')" title="Heading 1"><i class="bi bi-type-h1"></i></button>
+        <button class="toolbar-btn" onclick="insertSyntax('h2')" title="Heading 2"><i class="bi bi-type-h2"></i></button>
+        <button class="toolbar-btn" onclick="insertSyntax('h3')" title="Heading 3"><i class="bi bi-type-h3"></i></button>
+        <div class="vr mx-1 opacity-25"></div>
+        <button class="toolbar-btn" onclick="insertSyntax('quote')" title="Quote"><i class="bi bi-quote"></i></button>
+        <button class="toolbar-btn" onclick="insertSyntax('code')" title="Inline Code"><i class="bi bi-code"></i></button>
+        <button class="toolbar-btn" onclick="insertSyntax('codeblock')" title="Code Block"><i class="bi bi-code-square"></i></button>
+        <div class="vr mx-1 opacity-25"></div>
+        <button class="toolbar-btn" onclick="insertSyntax('link')" title="Link"><i class="bi bi-link-45deg"></i></button>
+        <button class="toolbar-btn" onclick="insertSyntax('image')" title="Image"><i class="bi bi-image"></i></button>
+        <button class="toolbar-btn" onclick="insertSyntax('table')" title="Table"><i class="bi bi-table"></i></button>
+        <div class="vr mx-1 opacity-25"></div>
+        <button class="toolbar-btn" onclick="insertSyntax('ul')" title="Unordered List"><i class="bi bi-list-ul"></i></button>
+        <button class="toolbar-btn" onclick="insertSyntax('ol')" title="Ordered List"><i class="bi bi-list-ol"></i></button>
+        <button class="toolbar-btn" onclick="insertSyntax('task')" title="Task List"><i class="bi bi-check2-square"></i></button>
+      </div>
+
+      <!-- Find & Replace Sub-Bar -->
+      <div class="find-replace-bar px-2 px-sm-3 py-2 d-none" id="find-replace-bar">
+        <div class="d-flex flex-wrap align-items-center gap-2">
+          <div class="input-group input-group-sm flex-grow-1 flex-sm-grow-0" style="min-width: 120px; max-width: 220px;">
+            <input type="text" id="find-input" class="form-control bg-dark text-light border-secondary" placeholder="Find text...">
+          </div>
+          <div class="input-group input-group-sm flex-grow-1 flex-sm-grow-0" style="min-width: 120px; max-width: 220px;">
+            <input type="text" id="replace-input" class="form-control bg-dark text-light border-secondary" placeholder="Replace with...">
+          </div>
+          <div class="d-flex align-items-center gap-1">
+            <button class="btn btn-sm btn-outline-secondary" id="btn-find-next" title="Find Next"><i class="bi bi-chevron-down"></i></button>
+            <button class="btn btn-sm btn-outline-secondary" id="btn-find-prev" title="Find Previous"><i class="bi bi-chevron-up"></i></button>
+            <button class="btn btn-sm btn-outline-primary" id="btn-replace">Replace</button>
+            <button class="btn btn-sm btn-primary" id="btn-replace-all">All</button>
+          </div>
+          <div class="d-flex align-items-center ms-auto gap-2">
+            <span class="small text-muted ms-1 ms-sm-2" id="find-counter">0 of 0</span>
+            <button class="btn btn-sm btn-link text-muted p-0" id="btn-close-find" aria-label="Close find"><i class="bi bi-x-lg"></i></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content Shell -->
+      <div class="d-flex flex-grow-1 overflow-hidden">
+        <!-- Desktop Sidebar Project Manager -->
+        <aside class="file-sidebar desktop-sidebar p-3" id="desktop-sidebar">
+          <div class="d-flex align-items-center justify-content-between mb-2 sidebar-hide-on-collapse">
+            <span class="small fw-bold text-uppercase text-muted">Projects</span>
+            <button class="btn btn-sm btn-primary py-1 px-2 fs-7" id="btn-new-file">
+              <i class="bi bi-plus-lg me-1"></i> New
+            </button>
+          </div>
+          
+          <!-- Local Storage Warning Notice with Permanent Close Button -->
+          <div class="alert border-0 p-2 mb-3 small d-flex align-items-start gap-2 sidebar-hide-on-collapse alert-dismissible fade show" role="alert" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25) !important; color: #fbbf24; border-radius: 6px; font-size: 0.78rem;">
+            <i class="bi bi-exclamation-triangle-fill fs-6 flex-shrink-0" style="margin-top: 2px;"></i>
+            <div>
+              <strong>Local Storage:</strong> Files are saved in browser storage. Back up regularly via 
+              <a href="#" class="text-warning text-decoration-underline fw-semibold" onclick="document.getElementById('export-json-btn').click(); return false;">Data &gt; Export</a>.
+            </div>
+            <button type="button" class="btn-close p-2" data-bs-dismiss="alert" aria-label="Close" style="font-size: 0.6rem; filter: invert(1);"></button>
+          </div>
+
+          <div class="file-list d-flex flex-column gap-1 overflow-y-auto" id="file-list-desktop">
+            <!-- Files dynamically populated via OPFS -->
+          </div>
+        </aside>
+
+        <!-- Offcanvas Mobile Sidebar Manager (Disabled on Desktop View) -->
+        <div class="offcanvas offcanvas-start bg-dark text-light" tabindex="-1" id="mobileSidebar">
+          <div class="offcanvas-header border-bottom border-secondary">
+            <h5 class="offcanvas-title">Projects</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+          </div>
+          <div class="offcanvas-body p-3">
+            <button class="btn btn-primary w-100 mb-2" id="btn-new-file-mobile">
+              <i class="bi bi-plus-lg me-1"></i> New File
+            </button>
+            
+            <!-- Mobile Local Storage Warning Notice with Permanent Close Button -->
+            <div class="alert border-0 p-2 mb-3 small d-flex align-items-start gap-2 alert-dismissible fade show" role="alert" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25) !important; color: #fbbf24; border-radius: 6px; font-size: 0.78rem;">
+              <i class="bi bi-exclamation-triangle-fill fs-6 flex-shrink-0" style="margin-top: 2px;"></i>
+              <div>
+                <strong>Local Storage:</strong> Files are saved in browser storage. Back up regularly via 
+                <a href="#" class="text-warning text-decoration-underline fw-semibold" onclick="document.getElementById('export-json-btn').click(); return false;">Data &gt; Export</a>.
+              </div>
+              <button type="button" class="btn-close p-2" data-bs-dismiss="alert" aria-label="Close" style="font-size: 0.6rem; filter: invert(1);"></button>
+            </div>
+
+            <div class="file-list d-flex flex-column gap-1" id="file-list-mobile">
+              <!-- Files populated via OPFS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Workspace (Editor + Resizer + Live Preview) -->
+        <main class="workspace view-mode-split" id="workspace">
+          <div class="pane editor-pane" id="editor-pane">
+            <textarea id="editor" placeholder="Write markdown here..." spellcheck="false"></textarea>
+          </div>
+          <div class="resizer" id="drag-resizer"></div>
+          <div class="pane preview-pane" id="preview">
+            <!-- Live rendered html -->
+          </div>
+        </main>
+      </div>
+
+      <!-- Footer Status Bar -->
+      <footer class="app-header border-top px-3 py-1 fs-7 d-flex justify-content-between align-items-center text-muted small">
+        <div>
+          <span id="word-count">0 words</span> | <span id="char-count">0 characters</span>
+        </div>
+        <div class="d-flex align-items-center gap-1 text-warning opacity-75">
+          <i class="bi bi-hdd"></i> <span>Saved locally</span>
+        </div>
+      </footer>
+    </div>
+
+    <!-- CDN Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.8/purify.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+      // OPFS Storage Controller
+      class StorageEngine {
+        static async getRoot() {
+          if ('storage' in navigator && 'getDirectory' in navigator.storage) {
+            return await navigator.storage.getDirectory();
+          }
+          throw new Error("OPFS is not supported in this browser environment.");
+        }
+        static async saveFile(filename, content) {
+          try {
+            const root = await this.getRoot();
+            const handle = await root.getFileHandle(filename, {
+              create: true
+            });
+            const writable = await handle.createWritable();
+            await writable.write(content);
+            await writable.close();
+          } catch (err) {
+            console.error("OPFS Save Error:", err);
+          }
+        }
+        static async readFile(filename) {
+          try {
+            const root = await this.getRoot();
+            const handle = await root.getFileHandle(filename);
+            const file = await handle.getFile();
+            return await file.text();
+          } catch (err) {
+            console.error("OPFS Read Error:", err);
+            return null;
+          }
+        }
+        static async listFiles() {
+          try {
+            const root = await this.getRoot();
+            const files = [];
+            for await (const entry of root.values()) {
+              if (entry.kind === 'file' && entry.name !== '.metadata.json') {
+                files.push(entry.name);
+              }
+            }
+            return files;
+          } catch (err) {
+            console.error("OPFS List Error:", err);
+            return [];
+          }
+        }
+        static async deleteFile(filename) {
+          try {
+            const root = await this.getRoot();
+            await root.removeEntry(filename);
+          } catch (err) {
+            console.error("OPFS Delete Error:", err);
+          }
+        }
+        static async saveMetadata(metadata) {
+          await this.saveFile('.metadata.json', JSON.stringify(metadata));
+        }
+        static async readMetadata() {
+          const content = await this.readFile('.metadata.json');
+          if (!content) return {};
+          try {
+            return JSON.parse(content);
+          } catch {
+            return {};
+          }
+        }
+      }
+
+      // Default Starter Content
+      const initialMarkdown = `# Welcome to HDMarkDown
+
+A modern **Markdown Live Workspace** built with pitch dark theme, local **OPFS** file storage, **Find & Replace**, **Undo/Redo**, and **JSON Import/Export**.
+
+## Features
+- **OPFS Engine**: Handles large document structures locally inside origin private storage.
+- **Multiple Files**: Manage all your markdown notes seamlessly from the sidebar.
+- **Synchronized Live Preview**: Auto-updates code blocks and formatted tables as you edit.
+
+\`\`\`javascript
+// Quick example of JavaScript highlight
+async function loadStorage() {
+  const root = await navigator.storage.getDirectory();
+  console.log("OPFS Loaded successfully!");
+}
+\`\`\`
+
+| Feature | Supported |
+| :--- | :---: |
+| Undo & Redo | ✅ |
+| Find & Replace | ✅ |
+| Import/Export JSON | ✅ |
+`;
+
+      // Global App State
+      let activeFileName = 'welcome.md';
+      let currentViewMode = 'split';
+      let saveTimeout = null;
+      
+      // Undo / Redo History Stack
+      const historyStack = [];
+      let historyIndex = -1;
+      const MAX_HISTORY = 100;
+      let isUndoRedoAction = false;
+
+      // DOM Elements
+      const editor = document.getElementById('editor');
+      const preview = document.getElementById('preview');
+      const workspace = document.getElementById('workspace');
+      const editorPane = document.getElementById('editor-pane');
+      const resizer = document.getElementById('drag-resizer');
+      const desktopSidebar = document.getElementById('desktop-sidebar');
+      const activeFileTitle = document.getElementById('active-file-title');
+      const wordCount = document.getElementById('word-count');
+      const charCount = document.getElementById('char-count');
+      const fileListDesktop = document.getElementById('file-list-desktop');
+      const fileListMobile = document.getElementById('file-list-mobile');
+
+      // Marked Renderer Configuration
+      marked.setOptions({
+        gfm: true,
+        breaks: true,
+        highlight: function(code, lang) {
+          const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+          return hljs.highlight(code, {
+            language
+          }).value;
+        }
+      });
+
+      // Push State to History Stack
+      function pushHistory(val) {
+        if (isUndoRedoAction) return;
+        if (historyIndex >= 0 && historyStack[historyIndex] === val) return;
+        if (historyIndex < historyStack.length - 1) {
+          historyStack.splice(historyIndex + 1);
+        }
+        historyStack.push(val);
+        if (historyStack.length > MAX_HISTORY) {
+          historyStack.shift();
+        } else {
+          historyIndex++;
+        }
+      }
+
+      function undo() {
+        if (historyIndex > 0) {
+          isUndoRedoAction = true;
+          historyIndex--;
+          editor.value = historyStack[historyIndex];
+          renderMarkdown();
+          isUndoRedoAction = false;
+        }
+      }
+
+      function redo() {
+        if (historyIndex < historyStack.length - 1) {
+          isUndoRedoAction = true;
+          historyIndex++;
+          editor.value = historyStack[historyIndex];
+          renderMarkdown();
+          isUndoRedoAction = false;
+        }
+      }
+
+      // Render Live Preview
+      function renderMarkdown() {
+        const markdownText = editor.value;
+        const cleanHTML = DOMPurify.sanitize(marked.parse(markdownText));
+        preview.innerHTML = cleanHTML;
+        preview.querySelectorAll('pre code').forEach((block) => {
+          hljs.highlightElement(block);
+        });
+        updateMetrics(markdownText);
+        
+        // Debounce OPFS File Auto-Save
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(async () => {
+          await StorageEngine.saveFile(activeFileName, markdownText);
+          const meta = await StorageEngine.readMetadata();
+          if (meta[activeFileName]) {
+            meta[activeFileName].modified = Date.now();
+            await StorageEngine.saveMetadata(meta);
+          }
+        }, 300);
+      }
+
+      // Word & Character Counter
+      function updateMetrics(text) {
+        const chars = text.length;
+        const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+        charCount.textContent = `${chars} characters`;
+        wordCount.textContent = `${words} words`;
+      }
+
+      // Refresh File Project List & Guarantee welcome.md Loads
+      async function refreshFileList() {
+        let files = await StorageEngine.listFiles();
+        const welcomeContent = await StorageEngine.readFile('welcome.md');
+
+        if (!files.includes('welcome.md') || welcomeContent === null) {
+          await StorageEngine.saveFile('welcome.md', initialMarkdown);
+          const meta = await StorageEngine.readMetadata();
+          meta['welcome.md'] = {
+            id: `note_${Date.now()}`,
+            title: 'Welcome',
+            category: 'all',
+            starred: false,
+            created: Date.now(),
+            modified: Date.now()
+          };
+          await StorageEngine.saveMetadata(meta);
+          files = await StorageEngine.listFiles();
+        }
+
+        const renderItems = (container) => {
+          container.innerHTML = '';
+          files.forEach(filename => {
+            const item = document.createElement('div');
+            item.className = `file-item ${filename === activeFileName ? 'active' : ''}`;
+            item.innerHTML = `
+            <span class="text-truncate flex-grow-1" title="${filename}"><i class="bi bi-file-earmark-text me-2"></i><span class="sidebar-hide-on-collapse">${filename}</span></span>
+            <div class="file-item-actions">
+              <i class="bi bi-pencil rename-btn text-muted" title="Rename"></i>
+              <i class="bi bi-trash delete-btn text-danger" title="Delete"></i>
+            </div>
+          `;
+            item.querySelector('.text-truncate').addEventListener('click', () => switchFile(filename));
+            item.querySelector('.rename-btn').addEventListener('click', (e) => {
+              e.stopPropagation();
+              renameFile(filename);
+            });
+            item.querySelector('.delete-btn').addEventListener('click', (e) => {
+              e.stopPropagation();
+              deleteFile(filename);
+            });
+            container.appendChild(item);
+          });
+        };
+        renderItems(fileListDesktop);
+        renderItems(fileListMobile);
+      }
+
+      // Switch Active File
+      async function switchFile(filename) {
+        activeFileName = filename;
+        activeFileTitle.value = filename;
+        let content = await StorageEngine.readFile(filename);
+        if (content === null && filename === 'welcome.md') {
+          content = initialMarkdown;
+          await StorageEngine.saveFile('welcome.md', initialMarkdown);
+        }
+        editor.value = content !== null ? content : '';
+        
+        // Reset Undo/Redo History for the new file
+        historyStack.length = 0;
+        historyIndex = -1;
+        pushHistory(editor.value);
+        renderMarkdown();
+        refreshFileList();
+
+        // Hide mobile offcanvas sidebar on selection
+        const mobileSidebarEl = document.getElementById('mobileSidebar');
+        if (mobileSidebarEl) {
+          const bsOffcanvas = bootstrap.Offcanvas.getInstance(mobileSidebarEl);
+          if (bsOffcanvas) {
+            bsOffcanvas.hide();
+          }
+        }
+      }
+
+      // Create New File
+      async function createNewFile() {
+        const filename = prompt('Enter new file name:', `document-${Date.now().toString().slice(-4)}.md`);
+        if (filename) {
+          const formattedName = filename.endsWith('.md') ? filename : `${filename}.md`;
+          await StorageEngine.saveFile(formattedName, '# New Document\n');
+          const meta = await StorageEngine.readMetadata();
+          meta[formattedName] = {
+            id: `note_${Date.now()}`,
+            title: formattedName.replace(/\.md$/, ''),
+            category: 'all',
+            starred: false,
+            created: Date.now(),
+            modified: Date.now()
+          };
+          await StorageEngine.saveMetadata(meta);
+          switchFile(formattedName);
+        }
+      }
+
+      // Rename File Functionality
+      async function renameFile(oldName) {
+        const newNameInput = prompt('Enter new filename:', oldName);
+        if (!newNameInput) return;
+        let newName = newNameInput.trim();
+        if (!newName.endsWith('.md')) newName += '.md';
+        if (newName === oldName) return;
+
+        const content = (oldName === activeFileName) ? editor.value : (await StorageEngine.readFile(oldName) || '');
+        const meta = await StorageEngine.readMetadata();
+        const activeMeta = meta[oldName] || {};
+
+        await StorageEngine.deleteFile(oldName);
+        delete meta[oldName];
+
+        await StorageEngine.saveFile(newName, content);
+        meta[newName] = {
+          ...activeMeta,
+          title: newName.replace(/\.md$/, ''),
+          modified: Date.now()
+        };
+        await StorageEngine.saveMetadata(meta);
+
+        if (activeFileName === oldName) {
+          activeFileName = newName;
+          activeFileTitle.value = newName;
+        }
+        refreshFileList();
+      }
+
+      // Delete File
+      async function deleteFile(filename) {
+        if (confirm(`Are you sure you want to delete "${filename}"?`)) {
+          await StorageEngine.deleteFile(filename);
+          const meta = await StorageEngine.readMetadata();
+          delete meta[filename];
+          await StorageEngine.saveMetadata(meta);
+          const files = await StorageEngine.listFiles();
+          if (files.length > 0) {
+            switchFile(files[0]);
+          } else {
+            await createNewFile();
+          }
+        }
+      }
+
+      // Rename Active File Title via Navbar Input
+      activeFileTitle.addEventListener('change', async () => {
+        let newTitle = activeFileTitle.value.trim();
+        if (!newTitle) return;
+        if (!newTitle.endsWith('.md')) newTitle += '.md';
+        if (newTitle !== activeFileName) {
+          await renameFile(activeFileName);
+        }
+      });
+
+      // Dual-Function Sidebar Button Toggle Handler (with LocalStorage State Persistence)
+      document.getElementById('btn-toggle-sidebar').addEventListener('click', () => {
+        if (window.innerWidth < 769) {
+          // Mobile: Toggle Offcanvas
+          const mobileSidebarEl = document.getElementById('mobileSidebar');
+          if (mobileSidebarEl) {
+            const bsOffcanvas = bootstrap.Offcanvas.getOrCreateInstance(mobileSidebarEl);
+            bsOffcanvas.toggle();
+          }
+        } else {
+          // Desktop: Collapse / Expand Sidebar & save state
+          desktopSidebar.classList.toggle('collapsed');
+          const isCollapsed = desktopSidebar.classList.contains('collapsed');
+          localStorage.setItem('sidebar_collapsed', isCollapsed ? 'true' : 'false');
+        }
+      });
+
+      // Column Resizer Engine
+      let isResizing = false;
+
+      resizer.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        resizer.classList.add('resizing');
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+        const workspaceRect = workspace.getBoundingClientRect();
+        const pointerX = e.clientX - workspaceRect.left;
+        const totalWidth = workspaceRect.width;
+        let percentage = (pointerX / totalWidth) * 100;
+        
+        // Clamping bounds
+        if (percentage < 15) percentage = 15;
+        if (percentage > 85) percentage = 85;
+
+        editorPane.style.width = `${percentage}%`;
+      });
+
+      document.addEventListener('mouseup', () => {
+        if (isResizing) {
+          isResizing = false;
+          resizer.classList.remove('resizing');
+          document.body.style.cursor = '';
+          document.body.style.userSelect = '';
+        }
+      });
+
+      // View Mode Selection & Split View Toggle Button Fix
+      const btnEdit = document.getElementById('btn-mode-edit');
+      const btnSplit = document.getElementById('btn-mode-split');
+      const btnPreview = document.getElementById('btn-mode-preview');
+
+      function setViewMode(mode) {
+        currentViewMode = mode;
+        workspace.className = `workspace view-mode-${mode}`;
+        [btnEdit, btnSplit, btnPreview].forEach(btn => btn && btn.classList.remove('active'));
+        if (mode === 'edit' && btnEdit) btnEdit.classList.add('active');
+        if (mode === 'split' && btnSplit) btnSplit.classList.add('active');
+        if (mode === 'preview' && btnPreview) btnPreview.classList.add('active');
+      }
+
+      if (btnEdit) btnEdit.addEventListener('click', () => setViewMode('edit'));
+      if (btnSplit) {
+        btnSplit.addEventListener('click', () => {
+          if (currentViewMode === 'split') {
+            setViewMode('edit');
+          } else {
+            setViewMode('split');
+          }
+        });
+      }
+      if (btnPreview) btnPreview.addEventListener('click', () => setViewMode('preview'));
+
+      // Toolbar Syntax Inserters
+      function insertSyntax(type) {
+        const start = editor.selectionStart;
+        const end = editor.selectionEnd;
+        const text = editor.value;
+        const selected = text.substring(start, end);
+        let before = '',
+          after = '',
+          placeholder = '';
+        switch (type) {
+          case 'bold':
+            before = '**';
+            after = '**';
+            placeholder = 'bold text';
+            break;
+          case 'italic':
+            before = '*';
+            after = '*';
+            placeholder = 'italic text';
+            break;
+          case 'strikethrough':
+            before = '~~';
+            after = '~~';
+            placeholder = 'strikethrough text';
+            break;
+          case 'h1':
+            before = '# ';
+            placeholder = 'Heading 1';
+            break;
+          case 'h2':
+            before = '## ';
+            placeholder = 'Heading 2';
+            break;
+          case 'h3':
+            before = '### ';
+            placeholder = 'Heading 3';
+            break;
+          case 'quote':
+            before = '> ';
+            placeholder = 'Blockquote';
+            break;
+          case 'code':
+            before = '`';
+            after = '`';
+            placeholder = 'code';
+            break;
+          case 'codeblock':
+            before = '```javascript\n';
+            after = '\n```';
+            placeholder = '// code block';
+            break;
+          case 'link':
+            before = '[';
+            after = '](https://example.com)';
+            placeholder = 'link text';
+            break;
+          case 'image':
+            before = '![Alt](';
+            after = ')';
+            placeholder = 'https://via.placeholder.com/150';
+            break;
+          case 'ul':
+            before = '- ';
+            placeholder = 'List item';
+            break;
+          case 'ol':
+            before = '1. ';
+            placeholder = 'List item';
+            break;
+          case 'task':
+            before = '- [ ] ';
+            placeholder = 'Task item';
+            break;
+          case 'table':
+            before = '\n| Header 1 | Header 2 |\n| --- | --- |\n| Cell 1 | Cell 2 |\n';
+            break;
+        }
+        const insertion = selected || placeholder;
+        editor.value = text.substring(0, start) + before + insertion + after + text.substring(end);
+        editor.focus();
+        const newCursorPos = start + before.length + insertion.length;
+        editor.setSelectionRange(start + before.length, newCursorPos);
+        pushHistory(editor.value);
+        renderMarkdown();
+      }
+
+      // Find & Replace Engine
+      const findReplaceBar = document.getElementById('find-replace-bar');
+      const findInput = document.getElementById('find-input');
+      const replaceInput = document.getElementById('replace-input');
+      const findCounter = document.getElementById('find-counter');
+      let findMatches = [];
+      let currentMatchIndex = -1;
+
+      function toggleFindReplaceBar() {
+        findReplaceBar.classList.toggle('d-none');
+        if (!findReplaceBar.classList.contains('d-none')) {
+          findInput.focus();
+          performFind();
+        }
+      }
+      document.getElementById('btn-close-find').addEventListener('click', toggleFindReplaceBar);
+
+      function performFind() {
+        const query = findInput.value;
+        findMatches = [];
+        currentMatchIndex = -1;
+        if (!query) {
+          findCounter.textContent = '0 of 0';
+          return;
+        }
+        const text = editor.value;
+        let pos = text.indexOf(query);
+        while (pos !== -1) {
+          findMatches.push(pos);
+          pos = text.indexOf(query, pos + query.length);
+        }
+        if (findMatches.length > 0) {
+          currentMatchIndex = 0;
+          selectMatch();
+        }
+        findCounter.textContent = findMatches.length > 0 ? `${currentMatchIndex + 1} of ${findMatches.length}` : '0 of 0';
+      }
+
+      function selectMatch() {
+        if (currentMatchIndex >= 0 && currentMatchIndex < findMatches.length) {
+          const start = findMatches[currentMatchIndex];
+          const end = start + findInput.value.length;
+          editor.focus();
+          editor.setSelectionRange(start, end);
+          findCounter.textContent = `${currentMatchIndex + 1} of ${findMatches.length}`;
+        }
+      }
+      findInput.addEventListener('input', performFind);
+      document.getElementById('btn-find-next').addEventListener('click', () => {
+        if (findMatches.length === 0) return;
+        currentMatchIndex = (currentMatchIndex + 1) % findMatches.length;
+        selectMatch();
+      });
+      document.getElementById('btn-find-prev').addEventListener('click', () => {
+        if (findMatches.length === 0) return;
+        currentMatchIndex = (currentMatchIndex - 1 + findMatches.length) % findMatches.length;
+        selectMatch();
+      });
+      document.getElementById('btn-replace').addEventListener('click', () => {
+        if (currentMatchIndex === -1 || findMatches.length === 0) return;
+        const start = findMatches[currentMatchIndex];
+        const queryLen = findInput.value.length;
+        const rep = replaceInput.value;
+        editor.value = editor.value.substring(0, start) + rep + editor.value.substring(start + queryLen);
+        pushHistory(editor.value);
+        renderMarkdown();
+        performFind();
+      });
+      document.getElementById('btn-replace-all').addEventListener('click', () => {
+        const query = findInput.value;
+        if (!query) return;
+        editor.value = editor.value.replaceAll(query, replaceInput.value);
+        pushHistory(editor.value);
+        renderMarkdown();
+        performFind();
+      });
+
+      // Synchronized Scrolling Engine
+      let isEditingScroll = false;
+      let isPreviewScroll = false;
+      editor.addEventListener('scroll', () => {
+        if (isPreviewScroll) return;
+        isEditingScroll = true;
+        const percentage = editor.scrollTop / (editor.scrollHeight - editor.clientHeight);
+        preview.scrollTop = percentage * (preview.scrollHeight - preview.clientHeight);
+        setTimeout(() => isEditingScroll = false, 50);
+      });
+      preview.addEventListener('scroll', () => {
+        if (isEditingScroll) return;
+        isPreviewScroll = true;
+        const percentage = preview.scrollTop / (preview.scrollHeight - preview.clientHeight);
+        editor.scrollTop = percentage * (editor.scrollHeight - editor.clientHeight);
+        setTimeout(() => isPreviewScroll = false, 50);
+      });
+
+      // Download & Export Utility
+      function triggerDownload(filename, content, type) {
+        const blob = new Blob([content], {
+          type: type
+        });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(link.href);
+      }
+
+      // Export JSON Format
+      document.getElementById('export-json-btn').addEventListener('click', async (e) => {
+        e.preventDefault();
+        const files = await StorageEngine.listFiles();
+        const meta = await StorageEngine.readMetadata();
+        const exportList = [];
+        for (const file of files) {
+          const content = await StorageEngine.readFile(file);
+          const info = meta[file] || {};
+          exportList.push({
+            id: info.id || `note_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+            title: info.title || file.replace(/\.md$/, ''),
+            content: content || '',
+            category: info.category || 'all',
+            starred: info.starred || false,
+            created: info.created || Date.now(),
+            modified: info.modified || Date.now()
+          });
+        }
+        triggerDownload('notes_export.json', JSON.stringify(exportList, null, 2), 'application/json');
+      });
+
+      // Import JSON Format
+      const importFileInput = document.getElementById('import-json-input');
+      document.getElementById('import-json-btn').addEventListener('click', (e) => {
+        e.preventDefault();
+        importFileInput.click();
+      });
+      importFileInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          try {
+            const notes = JSON.parse(event.target.result);
+            if (!Array.isArray(notes)) throw new Error("JSON file must contain an array of notes.");
+            const meta = await StorageEngine.readMetadata();
+            let lastFilename = activeFileName;
+            for (const item of notes) {
+              const rawTitle = item.title || 'Untitled';
+              let safeFilename = rawTitle.replace(/[^a-zA-Z0-9_-]/g, '_') + '.md';
+              let counter = 1;
+              const existingFiles = await StorageEngine.listFiles();
+              while (existingFiles.includes(safeFilename)) {
+                safeFilename = `${rawTitle.replace(/[^a-zA-Z0-9_-]/g, '_')}_${counter}.md`;
+                counter++;
+              }
+              await StorageEngine.saveFile(safeFilename, item.content || '');
+              meta[safeFilename] = {
+                id: item.id || `note_${Date.now()}`,
+                title: item.title || 'Untitled',
+                category: item.category || 'all',
+                starred: !!item.starred,
+                created: item.created || Date.now(),
+                modified: item.modified || Date.now()
+              };
+              lastFilename = safeFilename;
+            }
+            await StorageEngine.saveMetadata(meta);
+            await refreshFileList();
+            await switchFile(lastFilename);
+            alert(`Successfully imported ${notes.length} note(s)!`);
+          } catch (err) {
+            alert("Import Error: " + err.message);
+          }
+          importFileInput.value = '';
+        };
+        reader.readAsText(file);
+      });
+
+      document.getElementById('export-md').addEventListener('click', (e) => {
+        e.preventDefault();
+        triggerDownload(activeFileName, editor.value, 'text/markdown');
+      });
+
+      document.getElementById('export-html').addEventListener('click', (e) => {
+        e.preventDefault();
+        const rawTitle = activeFileName.replace(/\.md$/, '');
+        const fullHTML = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>${rawTitle}</title>
+  <style>
+    body { font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 2rem; background: #080a0f; color: #f1f5f9; }
+    pre { background: #10141d; padding: 1rem; border-radius: 6px; }
+    blockquote { border-left: 4px solid #6366f1; margin: 0; padding-left: 1rem; color: #94a3b8; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #222938; padding: 8px; }
+  </style>
+</head>
+<body>
+  ${preview.innerHTML}
+</body>
+</html>`;
+        triggerDownload(`${rawTitle}.html`, fullHTML, 'text/html');
+      });
+
+      // Keyboard Shortcuts
+      window.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+          if (e.shiftKey) {
+            e.preventDefault();
+            redo();
+          } else {
+            e.preventDefault();
+            undo();
+          }
+        } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+          e.preventDefault();
+          redo();
+        } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') {
+          e.preventDefault();
+          toggleFindReplaceBar();
+        }
+      });
+
+      // Input & History Event Listener
+      editor.addEventListener('input', () => {
+        pushHistory(editor.value);
+        renderMarkdown();
+      });
+
+      // Event Bindings for Project Buttons
+      document.getElementById('btn-new-file').addEventListener('click', createNewFile);
+      document.getElementById('btn-new-file-mobile').addEventListener('click', createNewFile);
+
+      // Initial App Bootstrap
+      window.addEventListener('DOMContentLoaded', async () => {
+        const ogUrlMeta = document.getElementById('og-url');
+        if (ogUrlMeta) {
+          ogUrlMeta.setAttribute('content', window.location.href);
+        }
+
+        // Restore sidebar collapse state from localStorage
+        if (localStorage.getItem('sidebar_collapsed') === 'true') {
+          desktopSidebar.classList.add('collapsed');
+        }
+
+        setViewMode('split');
+        await refreshFileList();
+        await switchFile(activeFileName);
+      });
+    </script>
+  </body>
+</html>
