@@ -19,6 +19,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <!-- Highlight.js Deep Dark Theme -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css" rel="stylesheet">
+    
     <style>
       :root {
         --bg-pitch: #080a0f;
@@ -31,13 +32,12 @@
         --text-muted: #94a3b8;
       }
 
-      /* Global Scrollbar Styles (Firefox) */
+      /* Global Scrollbar Styles */
       * {
         scrollbar-width: thin;
         scrollbar-color: var(--border-color) var(--bg-surface);
       }
 
-      /* Global Webkit Scrollbar Customization */
       ::-webkit-scrollbar {
         width: 8px;
         height: 8px;
@@ -57,12 +57,7 @@
         background-color: var(--accent-color);
       }
 
-      ::-webkit-scrollbar-corner {
-        background: var(--bg-pitch);
-      }
-
-      html,
-      body {
+      html, body {
         height: 100%;
         background-color: var(--bg-pitch);
         color: var(--text-main);
@@ -78,8 +73,7 @@
       }
 
       /* Global Button Centering Fix */
-      .btn,
-      .toolbar-btn {
+      .btn, .toolbar-btn {
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -114,7 +108,7 @@
       }
 
       .file-sidebar.collapsed {
-        width: 50px !important;
+        width: 60px !important;
         padding: 0.5rem 0.25rem !important;
       }
 
@@ -122,6 +116,10 @@
         display: none !important;
       }
 
+      .file-sidebar.collapsed .sidebar-section {
+        margin-bottom: 0.5rem !important;
+      }
+      
       .file-sidebar.collapsed .file-item {
         justify-content: center !important;
         padding: 0.5rem 0 !important;
@@ -144,7 +142,7 @@
       }
 
       .file-item {
-        padding: 0.5rem 0.8rem;
+        padding: 0.4rem 0.6rem;
         border-radius: 6px;
         color: var(--text-muted);
         cursor: pointer;
@@ -152,7 +150,7 @@
         align-items: center;
         justify-content: space-between;
         transition: all 0.15s ease;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         text-decoration: none;
       }
 
@@ -171,11 +169,20 @@
         opacity: 0;
         transition: opacity 0.15s ease;
         display: flex;
-        gap: 0.4rem;
+        gap: 0.3rem;
       }
 
       .file-item:hover .file-item-actions {
         opacity: 1;
+      }
+
+      .file-item-actions i {
+        padding: 0.2rem;
+        border-radius: 4px;
+      }
+      .file-item-actions i:hover {
+        background-color: var(--border-color);
+        color: var(--text-main) !important;
       }
 
       /* Mobile Formatting Toolbar */
@@ -200,15 +207,6 @@
         flex-shrink: 0;
       }
 
-      .toolbar-bar::-webkit-scrollbar {
-        height: 4px;
-      }
-
-      .toolbar-bar::-webkit-scrollbar-thumb {
-        background: var(--border-color);
-        border-radius: 3px;
-      }
-
       .toolbar-btn {
         border: none;
         background: transparent;
@@ -221,15 +219,9 @@
         font-size: 1rem;
       }
 
-      .toolbar-btn:hover {
+      .toolbar-btn:hover, .toolbar-btn.active {
         background-color: var(--bg-surface-elevated);
         color: var(--accent-color);
-      }
-
-      .toolbar-btn:active {
-        background-color: var(--bg-surface-elevated);
-        color: var(--accent-color);
-        transform: scale(0.92);
       }
 
       .find-replace-bar {
@@ -292,51 +284,30 @@
         background-color: var(--accent-color);
       }
 
-      /* Custom Panes & Textarea Scrollbars */
-      .pane::-webkit-scrollbar,
-      .file-sidebar::-webkit-scrollbar,
-      #editor::-webkit-scrollbar,
-      .offcanvas-body::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-      }
-
-      .pane::-webkit-scrollbar-thumb,
-      .file-sidebar::-webkit-scrollbar-thumb,
-      #editor::-webkit-scrollbar-thumb,
-      .offcanvas-body::-webkit-scrollbar-thumb {
-        background: var(--border-color);
-        border-radius: 4px;
-        border: 2px solid var(--bg-surface);
-      }
-
-      .pane::-webkit-scrollbar-thumb:hover,
-      .file-sidebar::-webkit-scrollbar-thumb:hover,
-      #editor::-webkit-scrollbar-thumb:hover,
-      .offcanvas-body::-webkit-scrollbar-thumb:hover {
-        background: var(--accent-color);
-      }
-
       /* Rendered Markdown Styling */
-      .preview-pane h1,
-      .preview-pane h2,
-      .preview-pane h3 {
+      .preview-pane h1, .preview-pane h2, .preview-pane h3 {
         border-bottom: 1px solid var(--border-color);
         padding-bottom: 0.3em;
         margin-top: 1.5em;
         margin-bottom: 1em;
       }
 
+      /* Table responsive overflow */
       .preview-pane table {
         width: 100%;
         margin-bottom: 1rem;
         border-collapse: collapse;
+        display: block;
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
       }
 
-      .preview-pane table,
-      .preview-pane th,
-      .preview-pane td {
+      .preview-pane table, .preview-pane th, .preview-pane td {
         border: 1px solid var(--border-color);
+      }
+      
+      .preview-pane th, .preview-pane td {
         padding: 0.5rem 0.75rem;
       }
 
@@ -351,6 +322,11 @@
         color: var(--text-muted);
       }
 
+      .preview-pane pre {
+        max-width: 100%;
+        overflow-x: auto;
+      }
+      
       .preview-pane pre code {
         border-radius: 8px;
         padding: 1.2rem !important;
@@ -363,7 +339,6 @@
         border-radius: 8px;
       }
 
-      /* Responsive Video Container for YouTube & Embeds */
       .video-container {
         position: relative;
         padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
@@ -376,10 +351,7 @@
         border: 1px solid var(--border-color);
       }
 
-      .video-container iframe,
-      .video-container object,
-      .video-container embed,
-      .video-container video {
+      .video-container iframe, .video-container video {
         position: absolute;
         top: 0;
         left: 0;
@@ -389,102 +361,80 @@
         border-radius: 8px;
       }
 
-      .preview-pane video {
-        max-width: 100%;
-        height: auto;
-        border-radius: 8px;
-        margin: 1rem 0;
-        background: #000;
-      }
-
       /* Responsive View Modes */
-      .view-mode-split .editor-pane {
-        display: flex;
-      }
+      .view-mode-split .editor-pane { display: flex; }
+      .view-mode-split .preview-pane { display: block; }
+      .view-mode-split .resizer { display: block; }
+      .view-mode-edit .editor-pane { display: flex; width: 100% !important; }
+      .view-mode-edit .preview-pane, .view-mode-edit .resizer { display: none !important; }
+      .view-mode-preview .editor-pane, .view-mode-preview .resizer { display: none !important; }
+      .view-mode-preview .preview-pane { display: block; width: 100% !important; }
 
-      .view-mode-split .preview-pane {
-        display: block;
-      }
-
-      .view-mode-split .resizer {
-        display: block;
-      }
-
-      .view-mode-edit .editor-pane {
-        display: flex;
-        width: 100% !important;
-      }
-
-      .view-mode-edit .preview-pane,
-      .view-mode-edit .resizer {
-        display: none !important;
-      }
-
-      .view-mode-preview .editor-pane,
-      .view-mode-preview .resizer {
-        display: none !important;
-      }
-
-      .view-mode-preview .preview-pane {
-        display: block;
-        width: 100% !important;
+      /* Table of Contents Offcanvas */
+      .toc-link:hover {
+        color: var(--accent-color) !important;
+        background-color: var(--bg-surface-elevated);
+        border-radius: 4px;
       }
 
       /* Desktop view rules */
       @media (min-width: 769px) {
-        #mobileSidebar {
-          display: none !important;
-        }
+        #mobileSidebar { display: none !important; }
       }
 
       /* Mobile Breakpoints & UI Tweaks */
       @media (max-width: 768px) {
-        .desktop-sidebar {
-          display: none !important;
-        }
-
-        .resizer {
-          display: none !important;
-        }
-
-        .editor-pane {
-          width: 100% !important;
-        }
-
-        .view-mode-split .editor-pane {
-          display: flex;
-          width: 100% !important;
-        }
-
-        .view-mode-split .preview-pane {
-          display: none;
-        }
-
-        .preview-pane {
-          padding: 1rem;
-        }
+        .desktop-sidebar { display: none !important; }
+        .resizer { display: none !important; }
+        .editor-pane { width: 100% !important; }
+        .view-mode-split .editor-pane { display: flex; width: 100% !important; }
+        .view-mode-split .preview-pane { display: none; }
+        .preview-pane { padding: 1rem; }
       }
 
       @media (max-width: 576px) {
-        .app-header {
-          padding-left: 0.5rem !important;
-          padding-right: 0.5rem !important;
-        }
+        .app-header { padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
+        #active-file-title { max-width: 110px !important; font-size: 0.85rem; }
+        .toolbar-btn { width: 38px; height: 38px; font-size: 1.1rem; }
+        #editor { padding: 0.85rem; font-size: 0.9rem; }
+      }
 
-        #active-file-title {
-          max-width: 110px !important;
-          font-size: 0.85rem;
+      /* Print Media Styles */
+      @media print {
+        @page { margin: 1cm; }
+        body {
+          background-color: white !important;
+          color: black !important;
+          overflow: visible !important;
+          height: auto !important;
         }
-
-        .toolbar-btn {
-          width: 38px;
-          height: 38px;
-          font-size: 1.1rem;
+        .app-container, .workspace, .preview-pane {
+          display: block !important;
+          height: auto !important;
+          overflow: visible !important;
+          background: white !important;
+          color: black !important;
         }
-
-        #editor {
-          padding: 0.85rem;
-          font-size: 0.9rem;
+        .app-header, .toolbar-bar, .file-sidebar, #mobileSidebar, .editor-pane, .resizer, .find-replace-bar, footer {
+          display: none !important;
+        }
+        .preview-pane {
+          width: 100% !important;
+          padding: 0 !important;
+        }
+        .preview-pane h1, .preview-pane h2, .preview-pane h3 {
+          border-bottom-color: #ccc !important;
+          page-break-after: avoid;
+        }
+        .preview-pane pre, .preview-pane blockquote {
+          border: 1px solid #ccc;
+          page-break-inside: avoid;
+        }
+        .preview-pane table, .preview-pane th, .preview-pane td {
+          border-color: #ccc !important;
+        }
+        .preview-pane th {
+          background-color: #f8f9fa !important;
         }
       }
     </style>
@@ -493,13 +443,14 @@
   <body>
     <!-- Hidden File Input for JSON Import -->
     <input type="file" id="import-json-input" accept=".json" class="d-none">
+    
     <div class="app-container">
       <!-- Navbar Header -->
       <header class="app-header px-2 px-sm-3 py-2">
         <div class="d-flex align-items-center justify-content-between gap-1 gap-sm-2">
           <!-- Left Section -->
           <div class="d-flex align-items-center gap-1 gap-sm-2 text-truncate me-auto">
-            <!-- Unified Sidebar Toggle Button (Handles both Desktop collapse & Mobile offcanvas) -->
+            <!-- Unified Sidebar Toggle Button -->
             <button class="btn btn-sm btn-outline-secondary p-1 border-0 me-1" id="btn-toggle-sidebar" title="Toggle Sidebar">
               <i class="bi bi-folder2-open fs-5"></i>
             </button>
@@ -512,8 +463,14 @@
             <!-- Active File Name Input -->
             <input type="text" id="active-file-title" class="form-control form-control-sm border-0 bg-transparent text-light fw-medium px-1 px-sm-2" value="untitled.md" title="Rename active document">
           </div>
-          <!-- Right Section: View Mode Switches & Data Dropdown -->
+
+          <!-- Right Section: Tools, Modes & Data -->
           <div class="d-flex align-items-center gap-1 gap-sm-2 flex-shrink-0">
+            <!-- Table of Contents Toggle -->
+            <button class="btn btn-sm btn-outline-secondary px-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" title="Table of Contents">
+              <i class="bi bi-list-nested"></i>
+            </button>
+
             <!-- View Modes -->
             <div class="btn-group btn-group-sm" role="group" aria-label="View Modes">
               <button type="button" class="btn btn-outline-secondary px-2" id="btn-mode-edit" title="Editor Only">
@@ -526,19 +483,20 @@
                 <i class="bi bi-eye-fill"></i>
               </button>
             </div>
-            <!-- Import / Export Dropdown -->
+
+            <!-- Import / Export / Print Dropdown -->
             <div class="dropdown">
               <button class="btn btn-sm btn-outline-secondary dropdown-toggle px-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="bi bi-arrow-down-up"></i> <span class="d-none d-sm-inline ms-1">Data</span>
               </button>
               <ul class="dropdown-menu dropdown-menu-end bg-dark border-secondary shadow">
-                <li><a class="dropdown-item text-light d-flex align-items-center gap-2" href="#" id="import-json-btn"><i class="bi bi-upload"></i> Import JSON Notes</a></li>
-                <li><a class="dropdown-item text-light d-flex align-items-center gap-2" href="#" id="export-json-btn"><i class="bi bi-filetype-json"></i> Export JSON Notes</a></li>
-                <li>
-                  <hr class="dropdown-divider border-secondary">
-                </li>
+                <li><a class="dropdown-item text-light d-flex align-items-center gap-2" href="#" id="import-json-btn"><i class="bi bi-upload"></i> Import JSON</a></li>
+                <li><a class="dropdown-item text-light d-flex align-items-center gap-2" href="#" id="export-json-btn"><i class="bi bi-filetype-json"></i> Export JSON</a></li>
+                <li><hr class="dropdown-divider border-secondary"></li>
                 <li><a class="dropdown-item text-light d-flex align-items-center gap-2" href="#" id="export-md"><i class="bi bi-filetype-md"></i> Download .md</a></li>
                 <li><a class="dropdown-item text-light d-flex align-items-center gap-2" href="#" id="export-html"><i class="bi bi-filetype-html"></i> Download .html</a></li>
+                <li><hr class="dropdown-divider border-secondary"></li>
+                <li><a class="dropdown-item text-light d-flex align-items-center gap-2" href="#" onclick="window.print(); return false;"><i class="bi bi-printer"></i> Print Document</a></li>
               </ul>
             </div>
           </div>
@@ -567,7 +525,6 @@
         <button class="toolbar-btn" onclick="insertSyntax('link')" title="Link"><i class="bi bi-link-45deg"></i></button>
         <button class="toolbar-btn" onclick="insertSyntax('image')" title="Image"><i class="bi bi-image"></i></button>
         <button class="toolbar-btn" onclick="insertSyntax('youtube')" title="YouTube Video"><i class="bi bi-youtube"></i></button>
-        <button class="toolbar-btn" onclick="insertSyntax('video')" title="HTML5 Video"><i class="bi bi-film"></i></button>
         <button class="toolbar-btn" onclick="insertSyntax('table')" title="Table"><i class="bi bi-table"></i></button>
         <div class="vr mx-1 opacity-25"></div>
         <button class="toolbar-btn" onclick="insertSyntax('ul')" title="Unordered List"><i class="bi bi-list-ul"></i></button>
@@ -600,52 +557,45 @@
       <!-- Main Content Shell -->
       <div class="d-flex flex-grow-1 overflow-hidden">
         <!-- Desktop Sidebar Project Manager -->
-        <aside class="file-sidebar desktop-sidebar p-3" id="desktop-sidebar">
-          <div class="d-flex align-items-center justify-content-between mb-2 sidebar-hide-on-collapse">
-            <span class="small fw-bold text-uppercase text-muted">Projects</span>
+        <aside class="file-sidebar desktop-sidebar pt-3 pb-2 px-2 overflow-y-auto" id="desktop-sidebar">
+          <div class="d-flex align-items-center justify-content-between mb-3 px-2 sidebar-hide-on-collapse">
+            <span class="small fw-bold text-uppercase text-muted">Workspace</span>
             <button class="btn btn-sm btn-primary py-1 px-2 fs-7" id="btn-new-file">
-              <i class="bi bi-plus-lg me-1"></i> New
+              <i class="bi bi-plus-lg"></i> <span class="ms-1">New</span>
             </button>
           </div>
-          
-          <!-- Local Storage Warning Notice with Permanent Close Button -->
-          <div class="alert border-0 p-2 mb-3 small d-flex align-items-start gap-2 sidebar-hide-on-collapse alert-dismissible fade show" role="alert" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25) !important; color: #fbbf24; border-radius: 6px; font-size: 0.78rem;">
-            <i class="bi bi-exclamation-triangle-fill fs-6 flex-shrink-0" style="margin-top: 2px;"></i>
-            <div>
-              <strong>Local Storage:</strong> Files are saved in browser storage. Back up regularly via 
-              <a href="#" class="text-warning text-decoration-underline fw-semibold" onclick="document.getElementById('export-json-btn').click(); return false;">Data &gt; Export</a>.
-            </div>
-            <button type="button" class="btn-close p-2" data-bs-dismiss="alert" aria-label="Close" style="font-size: 0.6rem; filter: invert(1);"></button>
-          </div>
 
-          <div class="file-list d-flex flex-column gap-1 overflow-y-auto" id="file-list-desktop">
-            <!-- Files dynamically populated via OPFS -->
+          <!-- Dynamic File Sections Container -->
+          <div id="sidebar-sections-desktop" class="d-flex flex-column">
+            <!-- Content injected by JavaScript -->
           </div>
         </aside>
 
-        <!-- Offcanvas Mobile Sidebar Manager (Disabled on Desktop View) -->
+        <!-- Offcanvas Mobile Sidebar Manager -->
         <div class="offcanvas offcanvas-start bg-dark text-light" tabindex="-1" id="mobileSidebar">
           <div class="offcanvas-header border-bottom border-secondary">
-            <h5 class="offcanvas-title">Projects</h5>
+            <h5 class="offcanvas-title">Workspace</h5>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
           </div>
           <div class="offcanvas-body p-3">
-            <button class="btn btn-primary w-100 mb-2" id="btn-new-file-mobile">
-              <i class="bi bi-plus-lg me-1"></i> New File
+            <button class="btn btn-primary w-100 mb-3" id="btn-new-file-mobile">
+              <i class="bi bi-plus-lg me-1"></i> New Document
             </button>
-            
-            <!-- Mobile Local Storage Warning Notice with Permanent Close Button -->
-            <div class="alert border-0 p-2 mb-3 small d-flex align-items-start gap-2 alert-dismissible fade show" role="alert" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25) !important; color: #fbbf24; border-radius: 6px; font-size: 0.78rem;">
-              <i class="bi bi-exclamation-triangle-fill fs-6 flex-shrink-0" style="margin-top: 2px;"></i>
-              <div>
-                <strong>Local Storage:</strong> Files are saved in browser storage. Back up regularly via 
-                <a href="#" class="text-warning text-decoration-underline fw-semibold" onclick="document.getElementById('export-json-btn').click(); return false;">Data &gt; Export</a>.
-              </div>
-              <button type="button" class="btn-close p-2" data-bs-dismiss="alert" aria-label="Close" style="font-size: 0.6rem; filter: invert(1);"></button>
+            <div id="sidebar-sections-mobile" class="d-flex flex-column">
+              <!-- Content injected by JavaScript -->
             </div>
+          </div>
+        </div>
 
-            <div class="file-list d-flex flex-column gap-1" id="file-list-mobile">
-              <!-- Files populated via OPFS -->
+        <!-- Table of Contents Offcanvas -->
+        <div class="offcanvas offcanvas-end bg-dark text-light shadow" tabindex="-1" id="tocOffcanvas" style="width: 300px;">
+          <div class="offcanvas-header border-bottom border-secondary">
+            <h6 class="offcanvas-title text-uppercase text-muted fw-bold"><i class="bi bi-list-nested me-2"></i>Table of Contents</h6>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+          </div>
+          <div class="offcanvas-body">
+            <div id="toc-list" class="d-flex flex-column small">
+              <!-- TOC Links injected here -->
             </div>
           </div>
         </div>
@@ -668,7 +618,7 @@
           <span id="word-count">0 words</span> | <span id="char-count">0 characters</span>
         </div>
         <div class="d-flex align-items-center gap-1 text-warning opacity-75">
-          <i class="bi bi-hdd"></i> <span>Saved locally</span>
+          <i class="bi bi-hdd"></i> <span>Local Storage</span>
         </div>
       </footer>
     </div>
@@ -678,6 +628,7 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.8/purify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    
     <script>
       // Configure DOMPurify to allow embedded frames and videos
       DOMPurify.addHook('uponSanitizeElement', (node, data) => {
@@ -700,9 +651,7 @@
         static async saveFile(filename, content) {
           try {
             const root = await this.getRoot();
-            const handle = await root.getFileHandle(filename, {
-              create: true
-            });
+            const handle = await root.getFileHandle(filename, { create: true });
             const writable = await handle.createWritable();
             await writable.write(content);
             await writable.close();
@@ -717,7 +666,6 @@
             const file = await handle.getFile();
             return await file.text();
           } catch (err) {
-            console.error("OPFS Read Error:", err);
             return null;
           }
         }
@@ -732,7 +680,6 @@
             }
             return files;
           } catch (err) {
-            console.error("OPFS List Error:", err);
             return [];
           }
         }
@@ -761,48 +708,37 @@
       // Default Starter Content
       const initialMarkdown = `# Welcome to HDMarkDown
 
-A modern **Markdown Live Workspace** built with pitch dark theme, local **OPFS** file storage, **Find & Replace**, **Undo/Redo**, and **JSON Import/Export**.
+A modern **Markdown Live Workspace** built with local **OPFS** file storage, **Find & Replace**, and **JSON Export**.
 
-## Media Embedding Support
+## New Features!
+- **Table of Contents**: Click the list icon in the top right.
+- **File Organization**: Sidebar now supports **Pinned** files and **Frequently Visited** tracking.
+- **Inline Rename**: Click the edit icon in the sidebar to rename files without pop-ups!
+- **Responsive Tables**: Tables now elegantly scroll horizontally on mobile.
 
-### YouTube Video
-<div class="video-container">
-  <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</div>
+| Feature | Supported | Description |
+| :--- | :---: | :--- |
+| Undo & Redo | ✅ | Full history tracking |
+| Frequent Files | ✅ | Tracks your most used documents |
+| Pinned Files | ✅ | Keep important files at the top |
+| Mobile Friendly | ✅ | Fluid layout and responsive tables |
 
-### HTML5 Native Video
-<video controls width="100%">
-  <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-
-## Features
-- **OPFS Engine**: Handles large document structures locally inside origin private storage.
-- **Multiple Files**: Manage all your markdown notes seamlessly from the sidebar.
-- **Synchronized Live Preview**: Auto-updates code blocks and formatted tables as you edit.
-
+### Code Support
 \`\`\`javascript
-// Quick example of JavaScript highlight
 async function loadStorage() {
   const root = await navigator.storage.getDirectory();
   console.log("OPFS Loaded successfully!");
 }
 \`\`\`
-
-| Feature | Supported |
-| :--- | :---: |
-| Undo & Redo | ✅ |
-| Find & Replace | ✅ |
-| Import/Export JSON | ✅ |
-| YouTube & Video | ✅ |
 `;
 
       // Global App State
-      let activeFileName = 'welcome.md';
+      let activeFileName = localStorage.getItem('lastActiveFile') || 'welcome.md';
       let currentViewMode = 'split';
       let saveTimeout = null;
+      let appMetadata = {};
       
-      // Undo / Redo History Stack
+      // Undo / Redo Stack
       const historyStack = [];
       let historyIndex = -1;
       const MAX_HISTORY = 100;
@@ -818,22 +754,20 @@ async function loadStorage() {
       const activeFileTitle = document.getElementById('active-file-title');
       const wordCount = document.getElementById('word-count');
       const charCount = document.getElementById('char-count');
-      const fileListDesktop = document.getElementById('file-list-desktop');
-      const fileListMobile = document.getElementById('file-list-mobile');
+      const sectionsDesktop = document.getElementById('sidebar-sections-desktop');
+      const sectionsMobile = document.getElementById('sidebar-sections-mobile');
+      const tocList = document.getElementById('toc-list');
 
-      // Marked Renderer Configuration
       marked.setOptions({
         gfm: true,
         breaks: true,
         highlight: function(code, lang) {
           const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-          return hljs.highlight(code, {
-            language
-          }).value;
+          return hljs.highlight(code, { language }).value;
         }
       });
 
-      // Custom YouTube Embed Parser extension for markdown syntax `![youtube](VIDEO_ID)`
+      // Custom YouTube Embed Parser
       const youtubeExtension = {
         name: 'youtube',
         level: 'inline',
@@ -851,30 +785,20 @@ async function loadStorage() {
         },
         renderer(token) {
           let videoId = token.id;
-          if (videoId.includes('v=')) {
-            videoId = videoId.split('v=')[1].split('&')[0];
-          } else if (videoId.includes('youtu.be/')) {
-            videoId = videoId.split('youtu.be/')[1].split('?')[0];
-          }
-          return `<div class="video-container"><iframe src="https://www.youtube.com/embed/${videoId}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+          if (videoId.includes('v=')) videoId = videoId.split('v=')[1].split('&')[0];
+          else if (videoId.includes('youtu.be/')) videoId = videoId.split('youtu.be/')[1].split('?')[0];
+          return `<div class="video-container"><iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe></div>`;
         }
       };
-
       marked.use({ extensions: [youtubeExtension] });
 
-      // Push State to History Stack
       function pushHistory(val) {
         if (isUndoRedoAction) return;
         if (historyIndex >= 0 && historyStack[historyIndex] === val) return;
-        if (historyIndex < historyStack.length - 1) {
-          historyStack.splice(historyIndex + 1);
-        }
+        if (historyIndex < historyStack.length - 1) historyStack.splice(historyIndex + 1);
         historyStack.push(val);
-        if (historyStack.length > MAX_HISTORY) {
-          historyStack.shift();
-        } else {
-          historyIndex++;
-        }
+        if (historyStack.length > MAX_HISTORY) historyStack.shift();
+        else historyIndex++;
       }
 
       function undo() {
@@ -897,33 +821,67 @@ async function loadStorage() {
         }
       }
 
-      // Render Live Preview
       function renderMarkdown() {
         const markdownText = editor.value;
         const rawHTML = marked.parse(markdownText);
         const cleanHTML = DOMPurify.sanitize(rawHTML, {
           ADD_TAGS: ['iframe', 'video', 'source'],
-          ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling', 'src', 'controls', 'type', 'width', 'height', 'title']
+          ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'src', 'controls', 'type', 'width']
         });
         preview.innerHTML = cleanHTML;
-        preview.querySelectorAll('pre code').forEach((block) => {
-          hljs.highlightElement(block);
-        });
+        
+        // Code Highlights
+        preview.querySelectorAll('pre code').forEach(block => hljs.highlightElement(block));
+        
+        // Generate Table of Contents & Headings
+        generateTOC();
         updateMetrics(markdownText);
         
-        // Debounce OPFS File Auto-Save
+        // Debounce Auto-Save
         clearTimeout(saveTimeout);
         saveTimeout = setTimeout(async () => {
           await StorageEngine.saveFile(activeFileName, markdownText);
-          const meta = await StorageEngine.readMetadata();
-          if (meta[activeFileName]) {
-            meta[activeFileName].modified = Date.now();
-            await StorageEngine.saveMetadata(meta);
+          if (appMetadata[activeFileName]) {
+            appMetadata[activeFileName].modified = Date.now();
+            await StorageEngine.saveMetadata(appMetadata);
           }
         }, 300);
       }
 
-      // Word & Character Counter
+      function generateTOC() {
+        const headings = preview.querySelectorAll('h1, h2, h3, h4, h5, h6');
+        tocList.innerHTML = '';
+        if (headings.length === 0) {
+          tocList.innerHTML = '<div class="text-muted p-2">No headings found in the document.</div>';
+          return;
+        }
+        headings.forEach((h, index) => {
+          if (!h.id) h.id = 'heading-' + index;
+          const link = document.createElement('a');
+          link.href = '#' + h.id;
+          link.textContent = h.textContent;
+          const level = parseInt(h.tagName[1]);
+          link.className = `toc-link d-block text-truncate text-decoration-none text-light py-1 px-2 mb-1`;
+          // Indentation based on heading level
+          link.style.paddingLeft = `${(level - 1) * 15 + 10}px`;
+          
+          if (level === 1) link.classList.add('fw-bold');
+          else link.classList.add('opacity-75');
+
+          link.addEventListener('click', (e) => {
+            e.preventDefault();
+            h.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Close mobile offcanvas if open
+            const offcanvasEl = document.getElementById('tocOffcanvas');
+            if (offcanvasEl) {
+               const bsOffcanvas = bootstrap.Offcanvas.getInstance(offcanvasEl);
+               if(bsOffcanvas && window.innerWidth < 992) bsOffcanvas.hide();
+            }
+          });
+          tocList.appendChild(link);
+        });
+      }
+
       function updateMetrics(text) {
         const chars = text.length;
         const words = text.trim() ? text.trim().split(/\s+/).length : 0;
@@ -931,109 +889,148 @@ async function loadStorage() {
         wordCount.textContent = `${words} words`;
       }
 
-      // Refresh File Project List & Guarantee welcome.md Loads
       async function refreshFileList() {
         let files = await StorageEngine.listFiles();
-        const welcomeContent = await StorageEngine.readFile('welcome.md');
-
-        if (!files.includes('welcome.md') || welcomeContent === null) {
+        appMetadata = await StorageEngine.readMetadata();
+        
+        // Ensure Welcome file exists
+        if (!files.includes('welcome.md') || !appMetadata['welcome.md']) {
           await StorageEngine.saveFile('welcome.md', initialMarkdown);
-          const meta = await StorageEngine.readMetadata();
-          meta['welcome.md'] = {
+          appMetadata['welcome.md'] = {
             id: `note_${Date.now()}`,
             title: 'Welcome',
-            category: 'all',
-            starred: false,
+            starred: true, // pin it by default
+            visitCount: 1,
             created: Date.now(),
             modified: Date.now()
           };
-          await StorageEngine.saveMetadata(meta);
+          await StorageEngine.saveMetadata(appMetadata);
           files = await StorageEngine.listFiles();
         }
 
-        const renderItems = (container) => {
-          container.innerHTML = '';
-          files.forEach(filename => {
-            const item = document.createElement('div');
-            item.className = `file-item ${filename === activeFileName ? 'active' : ''}`;
-            item.innerHTML = `
-            <span class="text-truncate flex-grow-1" title="${filename}"><i class="bi bi-file-earmark-text me-2"></i><span class="sidebar-hide-on-collapse">${filename}</span></span>
-            <div class="file-item-actions">
-              <i class="bi bi-pencil rename-btn text-muted" title="Rename"></i>
-              <i class="bi bi-trash delete-btn text-danger" title="Delete"></i>
-            </div>
-          `;
-            item.querySelector('.text-truncate').addEventListener('click', () => switchFile(filename));
-            item.querySelector('.rename-btn').addEventListener('click', (e) => {
-              e.stopPropagation();
-              renameFile(filename);
-            });
-            item.querySelector('.delete-btn').addEventListener('click', (e) => {
-              e.stopPropagation();
-              deleteFile(filename);
-            });
-            container.appendChild(item);
-          });
-        };
-        renderItems(fileListDesktop);
-        renderItems(fileListMobile);
-      }
-
-      // Switch Active File
-      async function switchFile(filename) {
-        activeFileName = filename;
-        activeFileTitle.value = filename;
-        let content = await StorageEngine.readFile(filename);
-        if (content === null && filename === 'welcome.md') {
-          content = initialMarkdown;
-          await StorageEngine.saveFile('welcome.md', initialMarkdown);
-        }
-        editor.value = content !== null ? content : '';
+        // Categorize Files
+        const pinnedFiles = files.filter(f => appMetadata[f]?.starred);
         
-        // Reset Undo/Redo History for the new file
-        historyStack.length = 0;
-        historyIndex = -1;
-        pushHistory(editor.value);
-        renderMarkdown();
-        refreshFileList();
+        // Top 5 Frequent Files (excluding pinned to avoid double top display, optional - here we show in both but separate visually)
+        const frequentFiles = files.filter(f => !appMetadata[f]?.starred && (appMetadata[f]?.visitCount || 0) > 2)
+                                   .sort((a,b) => (appMetadata[b]?.visitCount || 0) - (appMetadata[a]?.visitCount || 0))
+                                   .slice(0, 5);
+        
+        // All Files Sorted by Modification Date
+        const allFiles = [...files].sort((a,b) => (appMetadata[b]?.modified || 0) - (appMetadata[a]?.modified || 0));
 
-        // Hide mobile offcanvas sidebar on selection
-        const mobileSidebarEl = document.getElementById('mobileSidebar');
-        if (mobileSidebarEl) {
-          const bsOffcanvas = bootstrap.Offcanvas.getInstance(mobileSidebarEl);
-          if (bsOffcanvas) {
-            bsOffcanvas.hide();
-          }
-        }
-      }
-
-      // Create New File
-      async function createNewFile() {
-        const filename = prompt('Enter new file name:', `document-${Date.now().toString().slice(-4)}.md`);
-        if (filename) {
-          const formattedName = filename.endsWith('.md') ? filename : `${filename}.md`;
-          await StorageEngine.saveFile(formattedName, '# New Document\n');
-          const meta = await StorageEngine.readMetadata();
-          meta[formattedName] = {
-            id: `note_${Date.now()}`,
-            title: formattedName.replace(/\.md$/, ''),
-            category: 'all',
-            starred: false,
-            created: Date.now(),
-            modified: Date.now()
+        const renderSections = (container) => {
+          container.innerHTML = '';
+          
+          // Helper to create sections
+          const createSection = (title, icon, fileArray) => {
+            if (fileArray.length === 0) return;
+            const section = document.createElement('div');
+            section.className = 'sidebar-section mb-3';
+            section.innerHTML = `
+              <div class="small fw-bold text-uppercase text-muted mb-1 sidebar-hide-on-collapse px-2"><i class="${icon} me-1"></i> ${title}</div>
+              <div class="file-list d-flex flex-column gap-1"></div>
+            `;
+            const listContainer = section.querySelector('.file-list');
+            fileArray.forEach(filename => appendFileItem(listContainer, filename));
+            container.appendChild(section);
           };
-          await StorageEngine.saveMetadata(meta);
-          switchFile(formattedName);
-        }
+
+          createSection('Pinned', 'bi bi-pin-angle-fill', pinnedFiles);
+          createSection('Frequent', 'bi bi-graph-up', frequentFiles);
+          createSection('All Files', 'bi bi-folder2-open', allFiles);
+        };
+
+        renderSections(sectionsDesktop);
+        renderSections(sectionsMobile);
       }
 
-      // Rename File Functionality
-      async function renameFile(oldName) {
-        const newNameInput = prompt('Enter new filename:', oldName);
-        if (!newNameInput) return;
+      function appendFileItem(container, filename) {
+        const item = document.createElement('div');
+        const isPinned = appMetadata[filename]?.starred || false;
+        item.className = `file-item ${filename === activeFileName ? 'active' : ''}`;
+        
+        item.innerHTML = `
+          <span class="text-truncate flex-grow-1 filename-display d-flex align-items-center" title="${filename}">
+            <i class="bi bi-file-earmark-text me-2"></i>
+            <span class="sidebar-hide-on-collapse filename-text">${filename}</span>
+          </span>
+          <div class="file-item-actions sidebar-hide-on-collapse">
+            <i class="bi ${isPinned ? 'bi-pin-fill text-warning' : 'bi-pin-angle text-muted'} pin-btn" title="Toggle Pin"></i>
+            <i class="bi bi-pencil rename-btn text-muted" title="Rename inline"></i>
+            <i class="bi bi-trash delete-btn text-danger" title="Delete"></i>
+          </div>
+        `;
+        
+        // Click to Open File
+        item.querySelector('.filename-display').addEventListener('click', () => switchFile(filename));
+        
+        // Pin/Unpin Action
+        item.querySelector('.pin-btn').addEventListener('click', async (e) => {
+          e.stopPropagation();
+          appMetadata[filename].starred = !appMetadata[filename].starred;
+          await StorageEngine.saveMetadata(appMetadata);
+          refreshFileList();
+        });
+
+        // Inline Rename Action
+        item.querySelector('.rename-btn').addEventListener('click', (e) => {
+          e.stopPropagation();
+          triggerInlineRename(item, filename);
+        });
+
+        // Delete Action
+        item.querySelector('.delete-btn').addEventListener('click', (e) => {
+          e.stopPropagation();
+          deleteFile(filename);
+        });
+
+        container.appendChild(item);
+      }
+
+      function triggerInlineRename(itemDiv, oldName) {
+        const textSpan = itemDiv.querySelector('.filename-text');
+        if (!textSpan) return;
+
+        // Swap span for input
+        textSpan.outerHTML = `<input type="text" class="form-control form-control-sm bg-dark text-light inline-rename-input border-primary p-0 px-1" style="height: 24px; font-size: 0.85rem;" value="${oldName}">`;
+        const input = itemDiv.querySelector('.inline-rename-input');
+        
+        // Hide actions during rename
+        itemDiv.querySelector('.file-item-actions').classList.add('d-none');
+        
+        input.focus();
+        const extIndex = oldName.lastIndexOf('.');
+        if (extIndex > 0) input.setSelectionRange(0, extIndex);
+        else input.select();
+
+        const commitRename = async () => {
+          const newName = input.value.trim();
+          if (newName && newName !== oldName) {
+            await processFileRename(oldName, newName);
+          } else {
+            refreshFileList(); // abort rename UI
+          }
+        };
+
+        input.addEventListener('click', e => e.stopPropagation());
+        input.addEventListener('blur', commitRename);
+        input.addEventListener('keydown', (ke) => {
+          if (ke.key === 'Enter') input.blur();
+          if (ke.key === 'Escape') refreshFileList();
+        });
+      }
+
+      async function processFileRename(oldName, newNameInput) {
         let newName = newNameInput.trim();
         if (!newName.endsWith('.md')) newName += '.md';
         if (newName === oldName) return;
+
+        const existingFiles = await StorageEngine.listFiles();
+        if (existingFiles.includes(newName)) {
+          // Add a timestamp to avoid overwrite collisions silently
+          newName = newName.replace('.md', `_${Date.now().toString().slice(-4)}.md`);
+        }
 
         const content = (oldName === activeFileName) ? editor.value : (await StorageEngine.readFile(oldName) || '');
         const meta = await StorageEngine.readMetadata();
@@ -1049,91 +1046,85 @@ async function loadStorage() {
           modified: Date.now()
         };
         await StorageEngine.saveMetadata(meta);
+        appMetadata = meta;
 
         if (activeFileName === oldName) {
           activeFileName = newName;
           activeFileTitle.value = newName;
+          localStorage.setItem('lastActiveFile', newName);
         }
         refreshFileList();
       }
 
-      // Delete File
-      async function deleteFile(filename) {
-        if (confirm(`Are you sure you want to delete "${filename}"?`)) {
-          await StorageEngine.deleteFile(filename);
-          const meta = await StorageEngine.readMetadata();
-          delete meta[filename];
-          await StorageEngine.saveMetadata(meta);
-          const files = await StorageEngine.listFiles();
-          if (files.length > 0) {
-            switchFile(files[0]);
-          } else {
-            await createNewFile();
-          }
+      async function switchFile(filename) {
+        activeFileName = filename;
+        activeFileTitle.value = filename;
+        localStorage.setItem('lastActiveFile', filename);
+        
+        let content = await StorageEngine.readFile(filename);
+        editor.value = content !== null ? content : '';
+        
+        // Increment Visit Count
+        if (appMetadata[filename]) {
+          appMetadata[filename].visitCount = (appMetadata[filename].visitCount || 0) + 1;
+          await StorageEngine.saveMetadata(appMetadata);
+        }
+
+        historyStack.length = 0;
+        historyIndex = -1;
+        pushHistory(editor.value);
+        renderMarkdown();
+        refreshFileList(); // Re-render to update active state & frequent list
+
+        // Hide mobile offcanvas
+        const mobileSidebarEl = document.getElementById('mobileSidebar');
+        if (mobileSidebarEl) {
+          const bsOffcanvas = bootstrap.Offcanvas.getInstance(mobileSidebarEl);
+          if (bsOffcanvas) bsOffcanvas.hide();
         }
       }
 
-      // Rename Active File Title via Navbar Input
+      async function createNewFile() {
+        // We will create a default name silently, user can rename inline easily
+        let baseName = `Document_${Date.now().toString().slice(-4)}`;
+        const formattedName = `${baseName}.md`;
+        await StorageEngine.saveFile(formattedName, `# ${baseName}\n\nStart writing here...`);
+        
+        appMetadata[formattedName] = {
+          id: `note_${Date.now()}`,
+          title: baseName,
+          starred: false,
+          visitCount: 1,
+          created: Date.now(),
+          modified: Date.now()
+        };
+        await StorageEngine.saveMetadata(appMetadata);
+        switchFile(formattedName);
+      }
+
+      async function deleteFile(filename) {
+        if (confirm(`Delete "${filename}" permanently?`)) {
+          await StorageEngine.deleteFile(filename);
+          delete appMetadata[filename];
+          await StorageEngine.saveMetadata(appMetadata);
+          
+          const files = await StorageEngine.listFiles();
+          if (files.length > 0) switchFile(files[0]);
+          else await createNewFile();
+        }
+      }
+
+      // Header File Rename Logic
       activeFileTitle.addEventListener('change', async () => {
         let newTitle = activeFileTitle.value.trim();
-        if (!newTitle) return;
-        if (!newTitle.endsWith('.md')) newTitle += '.md';
-        if (newTitle !== activeFileName) {
-          await renameFile(activeFileName);
-        }
-      });
-
-      // Dual-Function Sidebar Button Toggle Handler (with LocalStorage State Persistence)
-      document.getElementById('btn-toggle-sidebar').addEventListener('click', () => {
-        if (window.innerWidth < 769) {
-          // Mobile: Toggle Offcanvas
-          const mobileSidebarEl = document.getElementById('mobileSidebar');
-          if (mobileSidebarEl) {
-            const bsOffcanvas = bootstrap.Offcanvas.getOrCreateInstance(mobileSidebarEl);
-            bsOffcanvas.toggle();
-          }
+        if (newTitle && newTitle !== activeFileName) {
+          await processFileRename(activeFileName, newTitle);
         } else {
-          // Desktop: Collapse / Expand Sidebar & save state
-          desktopSidebar.classList.toggle('collapsed');
-          const isCollapsed = desktopSidebar.classList.contains('collapsed');
-          localStorage.setItem('sidebar_collapsed', isCollapsed ? 'true' : 'false');
+          activeFileTitle.value = activeFileName;
         }
       });
 
-      // Column Resizer Engine
-      let isResizing = false;
-
-      resizer.addEventListener('mousedown', (e) => {
-        isResizing = true;
-        resizer.classList.add('resizing');
-        document.body.style.cursor = 'col-resize';
-        document.body.style.userSelect = 'none';
-      });
-
-      document.addEventListener('mousemove', (e) => {
-        if (!isResizing) return;
-        const workspaceRect = workspace.getBoundingClientRect();
-        const pointerX = e.clientX - workspaceRect.left;
-        const totalWidth = workspaceRect.width;
-        let percentage = (pointerX / totalWidth) * 100;
-        
-        // Clamping bounds
-        if (percentage < 15) percentage = 15;
-        if (percentage > 85) percentage = 85;
-
-        editorPane.style.width = `${percentage}%`;
-      });
-
-      document.addEventListener('mouseup', () => {
-        if (isResizing) {
-          isResizing = false;
-          resizer.classList.remove('resizing');
-          document.body.style.cursor = '';
-          document.body.style.userSelect = '';
-        }
-      });
-
-      // View Mode Selection & Split View Toggle Button Fix
+      // Split View Logic
       const btnEdit = document.getElementById('btn-mode-edit');
       const btnSplit = document.getElementById('btn-mode-split');
       const btnPreview = document.getElementById('btn-mode-preview');
@@ -1148,193 +1139,36 @@ async function loadStorage() {
       }
 
       if (btnEdit) btnEdit.addEventListener('click', () => setViewMode('edit'));
-      if (btnSplit) {
-        btnSplit.addEventListener('click', () => {
-          if (currentViewMode === 'split') {
-            setViewMode('edit');
-          } else {
-            setViewMode('split');
-          }
-        });
-      }
+      if (btnSplit) btnSplit.addEventListener('click', () => setViewMode(currentViewMode === 'split' ? 'edit' : 'split'));
       if (btnPreview) btnPreview.addEventListener('click', () => setViewMode('preview'));
 
-      // Toolbar Syntax Inserters
-      function insertSyntax(type) {
-        const start = editor.selectionStart;
-        const end = editor.selectionEnd;
-        const text = editor.value;
-        const selected = text.substring(start, end);
-        let before = '',
-          after = '',
-          placeholder = '';
-        switch (type) {
-          case 'bold':
-            before = '**';
-            after = '**';
-            placeholder = 'bold text';
-            break;
-          case 'italic':
-            before = '*';
-            after = '*';
-            placeholder = 'italic text';
-            break;
-          case 'strikethrough':
-            before = '~~';
-            after = '~~';
-            placeholder = 'strikethrough text';
-            break;
-          case 'h1':
-            before = '# ';
-            placeholder = 'Heading 1';
-            break;
-          case 'h2':
-            before = '## ';
-            placeholder = 'Heading 2';
-            break;
-          case 'h3':
-            before = '### ';
-            placeholder = 'Heading 3';
-            break;
-          case 'quote':
-            before = '> ';
-            placeholder = 'Blockquote';
-            break;
-          case 'code':
-            before = '`';
-            after = '`';
-            placeholder = 'code';
-            break;
-          case 'codeblock':
-            before = '```javascript\n';
-            after = '\n```';
-            placeholder = '// code block';
-            break;
-          case 'link':
-            before = '[';
-            after = '](https://example.com)';
-            placeholder = 'link text';
-            break;
-          case 'image':
-            before = '![Alt](';
-            after = ')';
-            placeholder = 'https://via.placeholder.com/150';
-            break;
-          case 'youtube':
-            before = '![youtube](';
-            after = ')';
-            placeholder = 'dQw4w9WgXcQ';
-            break;
-          case 'video':
-            before = '\n<video controls width="100%">\n  <source src="';
-            after = '" type="video/mp4">\n</video>\n';
-            placeholder = 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4';
-            break;
-          case 'ul':
-            before = '- ';
-            placeholder = 'List item';
-            break;
-          case 'ol':
-            before = '1. ';
-            placeholder = 'List item';
-            break;
-          case 'task':
-            before = '- [ ] ';
-            placeholder = 'Task item';
-            break;
-          case 'table':
-            before = '\n| Header 1 | Header 2 |\n| --- | --- |\n| Cell 1 | Cell 2 |\n';
-            break;
-        }
-        const insertion = selected || placeholder;
-        editor.value = text.substring(0, start) + before + insertion + after + text.substring(end);
-        editor.focus();
-        const newCursorPos = start + before.length + insertion.length;
-        editor.setSelectionRange(start + before.length, newCursorPos);
-        pushHistory(editor.value);
-        renderMarkdown();
-      }
-
-      // Find & Replace Engine
-      const findReplaceBar = document.getElementById('find-replace-bar');
-      const findInput = document.getElementById('find-input');
-      const replaceInput = document.getElementById('replace-input');
-      const findCounter = document.getElementById('find-counter');
-      let findMatches = [];
-      let currentMatchIndex = -1;
-
-      function toggleFindReplaceBar() {
-        findReplaceBar.classList.toggle('d-none');
-        if (!findReplaceBar.classList.contains('d-none')) {
-          findInput.focus();
-          performFind();
-        }
-      }
-      document.getElementById('btn-close-find').addEventListener('click', toggleFindReplaceBar);
-
-      function performFind() {
-        const query = findInput.value;
-        findMatches = [];
-        currentMatchIndex = -1;
-        if (!query) {
-          findCounter.textContent = '0 of 0';
-          return;
-        }
-        const text = editor.value;
-        let pos = text.indexOf(query);
-        while (pos !== -1) {
-          findMatches.push(pos);
-          pos = text.indexOf(query, pos + query.length);
-        }
-        if (findMatches.length > 0) {
-          currentMatchIndex = 0;
-          selectMatch();
-        }
-        findCounter.textContent = findMatches.length > 0 ? `${currentMatchIndex + 1} of ${findMatches.length}` : '0 of 0';
-      }
-
-      function selectMatch() {
-        if (currentMatchIndex >= 0 && currentMatchIndex < findMatches.length) {
-          const start = findMatches[currentMatchIndex];
-          const end = start + findInput.value.length;
-          editor.focus();
-          editor.setSelectionRange(start, end);
-          findCounter.textContent = `${currentMatchIndex + 1} of ${findMatches.length}`;
-        }
-      }
-      findInput.addEventListener('input', performFind);
-      document.getElementById('btn-find-next').addEventListener('click', () => {
-        if (findMatches.length === 0) return;
-        currentMatchIndex = (currentMatchIndex + 1) % findMatches.length;
-        selectMatch();
+      // Resizer Engine
+      let isResizing = false;
+      resizer.addEventListener('mousedown', () => {
+        isResizing = true;
+        resizer.classList.add('resizing');
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
       });
-      document.getElementById('btn-find-prev').addEventListener('click', () => {
-        if (findMatches.length === 0) return;
-        currentMatchIndex = (currentMatchIndex - 1 + findMatches.length) % findMatches.length;
-        selectMatch();
+      document.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+        const workspaceRect = workspace.getBoundingClientRect();
+        let percentage = ((e.clientX - workspaceRect.left) / workspaceRect.width) * 100;
+        if (percentage < 15) percentage = 15;
+        if (percentage > 85) percentage = 85;
+        editorPane.style.width = `${percentage}%`;
       });
-      document.getElementById('btn-replace').addEventListener('click', () => {
-        if (currentMatchIndex === -1 || findMatches.length === 0) return;
-        const start = findMatches[currentMatchIndex];
-        const queryLen = findInput.value.length;
-        const rep = replaceInput.value;
-        editor.value = editor.value.substring(0, start) + rep + editor.value.substring(start + queryLen);
-        pushHistory(editor.value);
-        renderMarkdown();
-        performFind();
-      });
-      document.getElementById('btn-replace-all').addEventListener('click', () => {
-        const query = findInput.value;
-        if (!query) return;
-        editor.value = editor.value.replaceAll(query, replaceInput.value);
-        pushHistory(editor.value);
-        renderMarkdown();
-        performFind();
+      document.addEventListener('mouseup', () => {
+        if (isResizing) {
+          isResizing = false;
+          resizer.classList.remove('resizing');
+          document.body.style.cursor = '';
+          document.body.style.userSelect = '';
+        }
       });
 
       // Synchronized Scrolling Engine
-      let isEditingScroll = false;
-      let isPreviewScroll = false;
+      let isEditingScroll = false, isPreviewScroll = false;
       editor.addEventListener('scroll', () => {
         if (isPreviewScroll) return;
         isEditingScroll = true;
@@ -1350,11 +1184,125 @@ async function loadStorage() {
         setTimeout(() => isPreviewScroll = false, 50);
       });
 
-      // Download & Export Utility
+      // Sidebar Toggle
+      document.getElementById('btn-toggle-sidebar').addEventListener('click', () => {
+        if (window.innerWidth < 769) {
+          const bsOffcanvas = bootstrap.Offcanvas.getOrCreateInstance(document.getElementById('mobileSidebar'));
+          bsOffcanvas.toggle();
+        } else {
+          desktopSidebar.classList.toggle('collapsed');
+          localStorage.setItem('sidebar_collapsed', desktopSidebar.classList.contains('collapsed') ? 'true' : 'false');
+        }
+      });
+
+      // Insert Syntax Helper
+      function insertSyntax(type) {
+        const start = editor.selectionStart;
+        const end = editor.selectionEnd;
+        const text = editor.value;
+        const selected = text.substring(start, end);
+        let before = '', after = '', placeholder = '';
+        
+        switch (type) {
+          case 'bold': before = '**'; after = '**'; placeholder = 'bold text'; break;
+          case 'italic': before = '*'; after = '*'; placeholder = 'italic text'; break;
+          case 'strikethrough': before = '~~'; after = '~~'; placeholder = 'strikethrough text'; break;
+          case 'h1': before = '# '; placeholder = 'Heading 1'; break;
+          case 'h2': before = '## '; placeholder = 'Heading 2'; break;
+          case 'h3': before = '### '; placeholder = 'Heading 3'; break;
+          case 'quote': before = '> '; placeholder = 'Blockquote'; break;
+          case 'code': before = '`'; after = '`'; placeholder = 'code'; break;
+          case 'codeblock': before = '```javascript\n'; after = '\n```'; placeholder = '// code block'; break;
+          case 'link': before = '['; after = '](https://example.com)'; placeholder = 'link text'; break;
+          case 'image': before = '![Alt]('; after = ')'; placeholder = 'https://via.placeholder.com/150'; break;
+          case 'youtube': before = '![youtube]('; after = ')'; placeholder = 'dQw4w9WgXcQ'; break;
+          case 'table': before = '\n| Header 1 | Header 2 |\n| --- | --- |\n| Cell 1 | Cell 2 |\n'; break;
+          case 'ul': before = '- '; placeholder = 'List item'; break;
+          case 'ol': before = '1. '; placeholder = 'List item'; break;
+          case 'task': before = '- [ ] '; placeholder = 'Task item'; break;
+        }
+        
+        const insertion = selected || placeholder;
+        editor.value = text.substring(0, start) + before + insertion + after + text.substring(end);
+        editor.focus();
+        editor.setSelectionRange(start + before.length, start + before.length + insertion.length);
+        pushHistory(editor.value);
+        renderMarkdown();
+      }
+
+      // Find & Replace System
+      const findReplaceBar = document.getElementById('find-replace-bar');
+      const findInput = document.getElementById('find-input');
+      const replaceInput = document.getElementById('replace-input');
+      const findCounter = document.getElementById('find-counter');
+      let findMatches = [], currentMatchIndex = -1;
+
+      function toggleFindReplaceBar() {
+        findReplaceBar.classList.toggle('d-none');
+        if (!findReplaceBar.classList.contains('d-none')) {
+          findInput.focus();
+          performFind();
+        }
+      }
+      document.getElementById('btn-close-find').addEventListener('click', toggleFindReplaceBar);
+
+      function performFind() {
+        const query = findInput.value;
+        findMatches = []; currentMatchIndex = -1;
+        if (!query) { findCounter.textContent = '0 of 0'; return; }
+        let pos = editor.value.indexOf(query);
+        while (pos !== -1) {
+          findMatches.push(pos);
+          pos = editor.value.indexOf(query, pos + query.length);
+        }
+        if (findMatches.length > 0) {
+          currentMatchIndex = 0;
+          selectMatch();
+        }
+        findCounter.textContent = findMatches.length > 0 ? `${currentMatchIndex + 1} of ${findMatches.length}` : '0 of 0';
+      }
+
+      function selectMatch() {
+        if (currentMatchIndex >= 0 && currentMatchIndex < findMatches.length) {
+          const start = findMatches[currentMatchIndex];
+          editor.focus();
+          editor.setSelectionRange(start, start + findInput.value.length);
+          findCounter.textContent = `${currentMatchIndex + 1} of ${findMatches.length}`;
+        }
+      }
+
+      findInput.addEventListener('input', performFind);
+      document.getElementById('btn-find-next').addEventListener('click', () => {
+        if (findMatches.length === 0) return;
+        currentMatchIndex = (currentMatchIndex + 1) % findMatches.length;
+        selectMatch();
+      });
+      document.getElementById('btn-find-prev').addEventListener('click', () => {
+        if (findMatches.length === 0) return;
+        currentMatchIndex = (currentMatchIndex - 1 + findMatches.length) % findMatches.length;
+        selectMatch();
+      });
+      document.getElementById('btn-replace').addEventListener('click', () => {
+        if (currentMatchIndex === -1 || findMatches.length === 0) return;
+        const start = findMatches[currentMatchIndex];
+        const queryLen = findInput.value.length;
+        editor.value = editor.value.substring(0, start) + replaceInput.value + editor.value.substring(start + queryLen);
+        pushHistory(editor.value);
+        renderMarkdown();
+        performFind();
+      });
+      document.getElementById('btn-replace-all').addEventListener('click', () => {
+        const query = findInput.value;
+        if (!query) return;
+        editor.value = editor.value.replaceAll(query, replaceInput.value);
+        pushHistory(editor.value);
+        renderMarkdown();
+        performFind();
+      });
+
+      // Data Imports and Exports
       function triggerDownload(filename, content, type) {
-        const blob = new Blob([content], {
-          type: type
-        });
+        const blob = new Blob([content], { type });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
         link.download = filename;
@@ -1362,31 +1310,28 @@ async function loadStorage() {
         URL.revokeObjectURL(link.href);
       }
 
-      // Export JSON Format
       document.getElementById('export-json-btn').addEventListener('click', async (e) => {
         e.preventDefault();
         const files = await StorageEngine.listFiles();
-        const meta = await StorageEngine.readMetadata();
         const exportList = [];
         for (const file of files) {
           const content = await StorageEngine.readFile(file);
-          const info = meta[file] || {};
+          const info = appMetadata[file] || {};
           exportList.push({
             id: info.id || `note_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-            title: info.title || file.replace(/\.md$/, ''),
+            title: file.replace(/\.md$/, ''),
             content: content || '',
-            category: info.category || 'all',
             starred: info.starred || false,
+            visitCount: info.visitCount || 0,
             created: info.created || Date.now(),
             modified: info.modified || Date.now()
           });
         }
-        triggerDownload('notes_export.json', JSON.stringify(exportList, null, 2), 'application/json');
+        triggerDownload('hdmarkdown_backup.json', JSON.stringify(exportList, null, 2), 'application/json');
       });
 
-      // Import JSON Format
       const importFileInput = document.getElementById('import-json-input');
-      document.getElementById('import-json-btn').addEventListener('click', (e) => {
+      document.getElementById('import-json-btn').addEventListener('click', e => {
         e.preventDefault();
         importFileInput.click();
       });
@@ -1397,8 +1342,6 @@ async function loadStorage() {
         reader.onload = async (event) => {
           try {
             const notes = JSON.parse(event.target.result);
-            if (!Array.isArray(notes)) throw new Error("JSON file must contain an array of notes.");
-            const meta = await StorageEngine.readMetadata();
             let lastFilename = activeFileName;
             for (const item of notes) {
               const rawTitle = item.title || 'Untitled';
@@ -1410,34 +1353,33 @@ async function loadStorage() {
                 counter++;
               }
               await StorageEngine.saveFile(safeFilename, item.content || '');
-              meta[safeFilename] = {
+              appMetadata[safeFilename] = {
                 id: item.id || `note_${Date.now()}`,
                 title: item.title || 'Untitled',
-                category: item.category || 'all',
                 starred: !!item.starred,
+                visitCount: item.visitCount || 0,
                 created: item.created || Date.now(),
                 modified: item.modified || Date.now()
               };
               lastFilename = safeFilename;
             }
-            await StorageEngine.saveMetadata(meta);
+            await StorageEngine.saveMetadata(appMetadata);
             await refreshFileList();
             await switchFile(lastFilename);
-            alert(`Successfully imported ${notes.length} note(s)!`);
           } catch (err) {
-            alert("Import Error: " + err.message);
+            console.error("Import Error", err);
           }
           importFileInput.value = '';
         };
         reader.readAsText(file);
       });
 
-      document.getElementById('export-md').addEventListener('click', (e) => {
+      document.getElementById('export-md').addEventListener('click', e => {
         e.preventDefault();
         triggerDownload(activeFileName, editor.value, 'text/markdown');
       });
 
-      document.getElementById('export-html').addEventListener('click', (e) => {
+      document.getElementById('export-html').addEventListener('click', e => {
         e.preventDefault();
         const rawTitle = activeFileName.replace(/\.md$/, '');
         const fullHTML = `<!DOCTYPE html>
@@ -1447,11 +1389,11 @@ async function loadStorage() {
   <title>${rawTitle}</title>
   <style>
     body { font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 2rem; background: #080a0f; color: #f1f5f9; }
-    pre { background: #10141d; padding: 1rem; border-radius: 6px; }
+    pre { background: #10141d; padding: 1rem; border-radius: 6px; overflow-x: auto; }
     blockquote { border-left: 4px solid #6366f1; margin: 0; padding-left: 1rem; color: #94a3b8; }
-    table { border-collapse: collapse; width: 100%; }
+    table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; }
     th, td { border: 1px solid #222938; padding: 8px; }
-    .video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; background: #000; margin: 1.5rem 0; border-radius: 8px; }
+    .video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin: 1.5rem 0; border-radius: 8px; }
     .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
   </style>
 </head>
@@ -1462,16 +1404,11 @@ async function loadStorage() {
         triggerDownload(`${rawTitle}.html`, fullHTML, 'text/html');
       });
 
-      // Keyboard Shortcuts
+      // Keyboard Shortcuts & Input
       window.addEventListener('keydown', (e) => {
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
-          if (e.shiftKey) {
-            e.preventDefault();
-            redo();
-          } else {
-            e.preventDefault();
-            undo();
-          }
+          e.preventDefault();
+          e.shiftKey ? redo() : undo();
         } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
           e.preventDefault();
           redo();
@@ -1481,32 +1418,29 @@ async function loadStorage() {
         }
       });
 
-      // Input & History Event Listener
       editor.addEventListener('input', () => {
         pushHistory(editor.value);
         renderMarkdown();
       });
 
-      // Event Bindings for Project Buttons
       document.getElementById('btn-new-file').addEventListener('click', createNewFile);
       document.getElementById('btn-new-file-mobile').addEventListener('click', createNewFile);
 
-      // Initial App Bootstrap
+      // Startup
       window.addEventListener('DOMContentLoaded', async () => {
-        const ogUrlMeta = document.getElementById('og-url');
-        if (ogUrlMeta) {
-          ogUrlMeta.setAttribute('content', window.location.href);
-        }
-
-        // Restore sidebar collapse state from localStorage
         if (localStorage.getItem('sidebar_collapsed') === 'true') {
           desktopSidebar.classList.add('collapsed');
         }
-
         setViewMode('split');
         await refreshFileList();
+        
+        const availableFiles = await StorageEngine.listFiles();
+        if (!availableFiles.includes(activeFileName)) {
+          activeFileName = 'welcome.md';
+        }
+        
         await switchFile(activeFileName);
       });
     </script>
-  </body>
+  <script src="https://replit-cdn.com/replit-pill/replit-pill.global.js" data-referral-code="r1h5un0351j1" data-repl-id="438fc542-1f41-4c89-8e71-a01f72feb76c"></script></body>
 </html>
