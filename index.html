@@ -220,6 +220,22 @@
         border-bottom: 1px solid var(--border-color);
       }
 
+      mark.find-match {
+        background-color: rgba(250, 204, 21, 0.35) !important;
+        color: #ffffff !important;
+        border-radius: 3px;
+        padding: 0 2px;
+        box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.5);
+      }
+
+      mark.find-match.active {
+        background-color: #f59e0b !important;
+        color: #000000 !important;
+        font-weight: bold;
+        outline: 2px solid #fbbf24;
+        box-shadow: 0 0 8px rgba(245, 158, 11, 0.8);
+      }
+
       .workspace {
         flex: 1;
         display: flex;
@@ -566,21 +582,21 @@
 
       <div class="find-replace-bar px-2 px-sm-3 py-2 d-none" id="find-replace-bar">
         <div class="d-flex flex-wrap align-items-center gap-2">
-          <div class="input-group input-group-sm flex-grow-1 flex-sm-grow-0" style="min-width: 120px; max-width: 220px;">
-            <input type="text" id="find-input" class="form-control bg-dark text-light border-secondary" placeholder="Find text...">
+          <div class="input-group input-group-sm flex-grow-1 flex-sm-grow-0" style="min-width: 140px; max-width: 220px;">
+            <input type="text" id="find-input" class="form-control bg-dark text-light border-secondary" placeholder="Find text..." autocomplete="off">
           </div>
-          <div class="input-group input-group-sm flex-grow-1 flex-sm-grow-0" style="min-width: 120px; max-width: 220px;">
-            <input type="text" id="replace-input" class="form-control bg-dark text-light border-secondary" placeholder="Replace with...">
+          <div class="input-group input-group-sm flex-grow-1 flex-sm-grow-0" style="min-width: 140px; max-width: 220px;">
+            <input type="text" id="replace-input" class="form-control bg-dark text-light border-secondary" placeholder="Replace with..." autocomplete="off">
           </div>
           <div class="d-flex align-items-center gap-1">
-            <button class="btn btn-sm btn-outline-secondary" id="btn-find-next" title="Find Next"><i class="bi bi-chevron-down"></i></button>
-            <button class="btn btn-sm btn-outline-secondary" id="btn-find-prev" title="Find Previous"><i class="bi bi-chevron-up"></i></button>
-            <button class="btn btn-sm btn-outline-primary" id="btn-replace">Replace</button>
-            <button class="btn btn-sm btn-primary" id="btn-replace-all">All</button>
+            <button class="btn btn-sm btn-outline-secondary" id="btn-find-next" title="Find Next (Enter)"><i class="bi bi-chevron-down"></i></button>
+            <button class="btn btn-sm btn-outline-secondary" id="btn-find-prev" title="Find Previous (Shift+Enter)"><i class="bi bi-chevron-up"></i></button>
+            <button class="btn btn-sm btn-outline-primary" id="btn-replace" title="Replace Current">Replace</button>
+            <button class="btn btn-sm btn-primary" id="btn-replace-all" title="Replace All Matches">All</button>
           </div>
           <div class="d-flex align-items-center ms-auto gap-2">
-            <span class="small text-muted ms-1 ms-sm-2" id="find-counter">0 of 0</span>
-            <button class="btn btn-sm btn-link text-muted p-0" id="btn-close-find" aria-label="Close find"><i class="bi bi-x-lg"></i></button>
+            <span class="small text-muted ms-1 ms-sm-2 font-monospace" id="find-counter">0 of 0</span>
+            <button class="btn btn-sm btn-link text-muted p-0 ms-1" id="btn-close-find" aria-label="Close find"><i class="bi bi-x-lg"></i></button>
           </div>
         </div>
       </div>
@@ -642,7 +658,7 @@
       </footer>
     </div>
 
-    <!-- Fullscreen Presentation Mode -->
+    <!-- Presentation Mode Container -->
     <div id="presentation-mode">
       <div class="position-absolute top-0 w-100 d-flex justify-content-between align-items-center p-3 z-3">
         <span class="badge bg-dark border border-secondary text-muted"><i class="bi bi-easel me-1"></i> Presentation Mode</span>
@@ -666,18 +682,17 @@
         <span class="small opacity-50 d-none d-sm-inline">Use ← / → / Space to navigate. Esc to exit.</span>
       </div>
       
-      <!-- Progress Bar -->
       <div class="position-absolute bottom-0 start-0 w-100" style="height: 4px; background: var(--bg-surface-elevated);">
         <div id="presentation-progress" class="h-100" style="width: 0%; background: var(--accent-color); transition: width 0.3s ease;"></div>
       </div>
     </div>
 
-    <!-- Keyboard Shortcuts Modal -->
-    <div class="modal fade" id="shortcutsModal" tabindex="-1" aria-labelledby="shortcutsModalLabel" aria-hidden="true">
+    <!-- Modals -->
+    <div class="modal fade" id="shortcutsModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content bg-dark text-light border-secondary">
           <div class="modal-header border-bottom border-secondary">
-            <h5 class="modal-title" id="shortcutsModalLabel"><i class="bi bi-keyboard me-2 text-info"></i>Keyboard Shortcuts</h5>
+            <h5 class="modal-title"><i class="bi bi-keyboard me-2 text-info"></i>Keyboard Shortcuts</h5>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body p-0">
@@ -690,9 +705,6 @@
                 <tr><td class="ps-3 border-secondary">Next Slide</td><td class="text-end pe-3 border-secondary"><kbd>→</kbd> or <kbd>Space</kbd></td></tr>
                 <tr><td class="ps-3 border-secondary">Previous Slide</td><td class="text-end pe-3 border-secondary"><kbd>←</kbd></td></tr>
                 <tr><td class="ps-3 border-secondary">Exit Presentation</td><td class="text-end pe-3 border-secondary"><kbd>Esc</kbd></td></tr>
-                <tr><td colspan="2" class="ps-3 bg-secondary bg-opacity-25 text-info fw-bold border-secondary small">Mermaid Diagrams Controls</td></tr>
-                <tr><td class="ps-3 border-secondary">Pan View</td><td class="text-end pe-3 border-secondary"><kbd>Click</kbd> + <kbd>Drag</kbd></td></tr>
-                <tr><td class="ps-3 border-0">Zoom In/Out</td><td class="text-end pe-3 border-0"><kbd>Scroll Wheel</kbd></td></tr>
               </tbody>
             </table>
           </div>
@@ -700,12 +712,11 @@
       </div>
     </div>
 
-    <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content bg-dark text-light border-danger">
           <div class="modal-header border-bottom border-secondary">
-            <h5 class="modal-title text-danger" id="deleteModalLabel"><i class="bi bi-exclamation-triangle-fill me-2"></i>Delete File</h5>
+            <h5 class="modal-title text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Delete File</h5>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body text-center">
@@ -720,13 +731,12 @@
       </div>
     </div>
 
-    <!-- CDN Scripts -->
+    <!-- External Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.8/purify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     
-    <!-- Mermaid Diagram script loaded as module -->
     <script type="module">
       import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.esm.min.mjs';
       mermaid.initialize({ startOnLoad: false, theme: 'dark', securityLevel: 'loose' });
@@ -735,7 +745,6 @@
     </script>
 
     <script>
-      // Configure DOMPurify to allow embedded frames and videos safely
       DOMPurify.addHook('uponSanitizeElement', (node, data) => {
         if (data.tagName === 'iframe') {
           const src = node.getAttribute('src') || '';
@@ -803,7 +812,6 @@
               const tx = db.transaction(this.storeName, 'readonly');
               const request = tx.objectStore(this.storeName).getAllKeys();
               request.onsuccess = () => {
-                // Hide metadata files from user listing
                 resolve(request.result.filter(k => k !== '.metadata.json' && k !== '.opfs_migrated'));
               };
               request.onerror = () => reject(tx.error);
@@ -835,17 +843,13 @@
         static async readMetadata() {
           const content = await this.readFile('.metadata.json');
           if (!content) return {};
-          try {
-            return JSON.parse(content);
-          } catch {
-            return {};
-          }
+          try { return JSON.parse(content); } catch { return {}; }
         }
 
         static async migrateFromOPFS() {
           try {
             const migrated = await this.readFile('.opfs_migrated');
-            if (migrated) return; // Already migrated
+            if (migrated) return;
 
             if (!('storage' in navigator && 'getDirectory' in navigator.storage)) return;
             const root = await navigator.storage.getDirectory();
@@ -866,7 +870,7 @@
             }
             await this.saveFile('.opfs_migrated', 'true');
           } catch (e) {
-            console.warn("OPFS migration skipped or failed (Likely due to environment restrictions):", e);
+            console.warn("OPFS migration skipped or failed:", e);
           }
         }
       }
@@ -918,7 +922,6 @@ async function loadStorage() {
       const MAX_HISTORY = 100;
       let isUndoRedoAction = false;
 
-      // DOM Elements
       const editor = document.getElementById('editor');
       const preview = document.getElementById('preview');
       const workspace = document.getElementById('workspace');
@@ -962,7 +965,6 @@ async function loadStorage() {
       };
       marked.use({ extensions: [youtubeExtension] });
 
-      // Decoupled Auto-Save function - ONLY called when text is intentionally modified!
       function triggerAutoSave() {
         clearTimeout(saveTimeout);
         saveTimeout = setTimeout(async () => {
@@ -976,7 +978,6 @@ async function loadStorage() {
         }, 500);
       }
 
-      // Fallback save on tab close / visibility change
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'hidden' && activeFileName) {
           StorageEngine.saveFile(activeFileName, editor.value);
@@ -1022,7 +1023,6 @@ async function loadStorage() {
         const svg = container.querySelector('svg');
         if (!svg) return;
 
-        // Inject Overlay Controls
         const controls = document.createElement('div');
         controls.className = 'mermaid-controls position-absolute top-0 end-0 m-2 bg-dark rounded shadow-lg border border-secondary p-1 d-flex flex-column gap-1';
         controls.innerHTML = `
@@ -1033,8 +1033,8 @@ async function loadStorage() {
             <button class="btn btn-outline-light pan-right" title="Move Right"><i class="bi bi-arrow-right"></i></button>
           </div>
           <div class="btn-group btn-group-sm">
-            <button class="btn btn-outline-light zoom-in" title="Zoom In (Scroll Up)"><i class="bi bi-zoom-in"></i></button>
-            <button class="btn btn-outline-light zoom-out" title="Zoom Out (Scroll Down)"><i class="bi bi-zoom-out"></i></button>
+            <button class="btn btn-outline-light zoom-in" title="Zoom In"><i class="bi bi-zoom-in"></i></button>
+            <button class="btn btn-outline-light zoom-out" title="Zoom Out"><i class="bi bi-zoom-out"></i></button>
             <button class="btn btn-outline-light reset" title="Reset View"><i class="bi bi-arrow-counterclockwise"></i></button>
           </div>
         `;
@@ -1162,6 +1162,11 @@ async function loadStorage() {
           }
         }
         
+        // Apply search match highlights if Find bar is open
+        if (!findReplaceBar.classList.contains('d-none') && findInput.value) {
+          applySearchHighlightsToPreview(findInput.value);
+        }
+
         generateTOC();
         updateMetrics(markdownText);
       }
@@ -1379,8 +1384,6 @@ async function loadStorage() {
         historyIndex = -1;
         pushHistory(editor.value);
         
-        // Render Markdown immediately to show UI but DO NOT trigger auto-save 
-        // to prevent overwriting files if the read operation was slow or failed
         renderMarkdown(); 
         refreshFileList();
 
@@ -1658,68 +1661,264 @@ async function loadStorage() {
       let findMatches = [], currentMatchIndex = -1;
 
       function toggleFindReplaceBar() {
-        findReplaceBar.classList.toggle('d-none');
-        if (!findReplaceBar.classList.contains('d-none')) {
+        const isHidden = findReplaceBar.classList.contains('d-none');
+        if (isHidden) {
+          findReplaceBar.classList.remove('d-none');
           findInput.focus();
-          performFind();
+          findInput.select();
+          performFind(false); // Do NOT steal focus on toggle open
+        } else {
+          findReplaceBar.classList.add('d-none');
+          renderMarkdown();
+          editor.focus();
         }
       }
       document.getElementById('btn-close-find').addEventListener('click', toggleFindReplaceBar);
 
-      function performFind() {
+      // Perform find without stealing focus while typing
+      function performFind(shouldFocusEditor = false) {
         const query = findInput.value;
-        findMatches = []; currentMatchIndex = -1;
-        if (!query) { findCounter.textContent = '0 of 0'; return; }
-        let pos = editor.value.indexOf(query);
+        findMatches = []; 
+        currentMatchIndex = -1;
+        
+        if (!query) { 
+          findCounter.textContent = '0 of 0'; 
+          renderMarkdown();
+          return; 
+        }
+
+        const text = editor.value;
+        const lowerText = text.toLowerCase();
+        const lowerQuery = query.toLowerCase();
+
+        let pos = lowerText.indexOf(lowerQuery);
         while (pos !== -1) {
           findMatches.push(pos);
-          pos = editor.value.indexOf(query, pos + query.length);
+          pos = lowerText.indexOf(lowerQuery, pos + lowerQuery.length);
         }
+
         if (findMatches.length > 0) {
           currentMatchIndex = 0;
-          selectMatch();
+          selectMatch(true, shouldFocusEditor);
+        } else {
+          findCounter.textContent = '0 of 0';
         }
-        findCounter.textContent = findMatches.length > 0 ? `${currentMatchIndex + 1} of ${findMatches.length}` : '0 of 0';
+        
+        // Refresh rendering in preview so text match highlights update
+        renderMarkdown();
       }
 
-      function selectMatch() {
+      function selectMatch(scrollEditor = true, focusEditor = false) {
         if (currentMatchIndex >= 0 && currentMatchIndex < findMatches.length) {
           const start = findMatches[currentMatchIndex];
-          editor.focus();
-          editor.setSelectionRange(start, start + findInput.value.length);
+          const queryLen = findInput.value.length;
+          const end = start + queryLen;
+          
+          // Scroll input editor textarea to the precise line match position
+          if (scrollEditor) {
+            const textBefore = editor.value.substring(0, start);
+            const lineNum = textBefore.split('\n').length;
+            const computedStyle = window.getComputedStyle(editor);
+            const lineHeight = parseFloat(computedStyle.lineHeight) || 24;
+            const paddingTop = parseFloat(computedStyle.paddingTop) || 16;
+            const targetScrollTop = Math.max(0, (lineNum - 1) * lineHeight - (editor.clientHeight / 2) + paddingTop);
+            
+            editor.scrollTop = targetScrollTop;
+          }
+
+          // Select matching text range in input editor
+          editor.setSelectionRange(start, end);
+
+          if (focusEditor) {
+            editor.focus();
+            editor.setSelectionRange(start, end);
+          }
+
           findCounter.textContent = `${currentMatchIndex + 1} of ${findMatches.length}`;
+          updateActiveHighlightInPreview();
         }
       }
 
-      findInput.addEventListener('input', performFind);
+      // Highlight matching text directly inside the preview pane safely
+      function applySearchHighlightsToPreview(query) {
+        if (!query) return;
+        const lowerQuery = query.toLowerCase();
+        
+        const walker = document.createTreeWalker(preview, NodeFilter.SHOW_TEXT, null, false);
+        const textNodes = [];
+        let node;
+        while (node = walker.nextNode()) {
+          if (node.parentElement && ['SCRIPT', 'STYLE', 'SVG', 'BUTTON'].includes(node.parentElement.tagName)) continue;
+          if (node.nodeValue.toLowerCase().includes(lowerQuery)) {
+            textNodes.push(node);
+          }
+        }
+
+        let globalMatchCounter = 0;
+        textNodes.forEach(tNode => {
+          const val = tNode.nodeValue;
+          const lowerVal = val.toLowerCase();
+          let idx = lowerVal.indexOf(lowerQuery);
+          if (idx === -1) return;
+
+          const frag = document.createDocumentFragment();
+          let lastIdx = 0;
+
+          while (idx !== -1) {
+            if (idx > lastIdx) {
+              frag.appendChild(document.createTextNode(val.substring(lastIdx, idx)));
+            }
+            
+            const mark = document.createElement('mark');
+            mark.className = 'find-match';
+            if (globalMatchCounter === currentMatchIndex) {
+              mark.classList.add('active');
+            }
+            mark.textContent = val.substring(idx, idx + query.length);
+            frag.appendChild(mark);
+
+            globalMatchCounter++;
+            lastIdx = idx + query.length;
+            idx = lowerVal.indexOf(lowerQuery, lastIdx);
+          }
+
+          if (lastIdx < val.length) {
+            frag.appendChild(document.createTextNode(val.substring(lastIdx)));
+          }
+
+          tNode.parentNode.replaceChild(frag, tNode);
+        });
+
+        const activeMark = preview.querySelector('mark.find-match.active');
+        if (activeMark) {
+          activeMark.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+
+      function updateActiveHighlightInPreview() {
+        const marks = preview.querySelectorAll('mark.find-match');
+        marks.forEach((m, i) => {
+          if (i === currentMatchIndex) {
+            m.classList.add('active');
+            m.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          } else {
+            m.classList.remove('active');
+          }
+        });
+      }
+
+      // Event listeners for Find & Replace without auto-jumping/focus stealing on keypress
+      findInput.addEventListener('input', () => performFind(false));
+
+      findInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (e.shiftKey) {
+            if (findMatches.length === 0) return;
+            currentMatchIndex = (currentMatchIndex - 1 + findMatches.length) % findMatches.length;
+          } else {
+            if (findMatches.length === 0) return;
+            currentMatchIndex = (currentMatchIndex + 1) % findMatches.length;
+          }
+          selectMatch(true, true);
+        } else if (e.key === 'Escape') {
+          toggleFindReplaceBar();
+        }
+      });
+
+      replaceInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          document.getElementById('btn-replace').click();
+        } else if (e.key === 'Escape') {
+          toggleFindReplaceBar();
+        }
+      });
+
       document.getElementById('btn-find-next').addEventListener('click', () => {
         if (findMatches.length === 0) return;
         currentMatchIndex = (currentMatchIndex + 1) % findMatches.length;
-        selectMatch();
+        selectMatch(true, true);
       });
+
       document.getElementById('btn-find-prev').addEventListener('click', () => {
         if (findMatches.length === 0) return;
         currentMatchIndex = (currentMatchIndex - 1 + findMatches.length) % findMatches.length;
-        selectMatch();
+        selectMatch(true, true);
       });
+
+      document.getElementById('btn-replace').addEventListener('click', () => {
+        if (currentMatchIndex === -1 || findMatches.length === 0) return;
+        const start = findMatches[currentMatchIndex];
+        const queryLen = findInput.value.length;
+        const replaceVal = replaceInput.value;
+
+        // Perform text replacement in input editor
+        const before = editor.value.substring(0, start);
+        const after = editor.value.substring(start + queryLen);
+        editor.value = before + replaceVal + after;
+
+        pushHistory(editor.value);
+        triggerAutoSave();
+
+        // Refresh search matches and highlight next match in input editor
+        performFind(false);
+        if (findMatches.length > 0) {
+          if (currentMatchIndex >= findMatches.length) {
+            currentMatchIndex = 0;
+          }
+          selectMatch(true, true);
+        }
+      });
+
+      document.getElementById('btn-replace-all').addEventListener('click', () => {
+        const query = findInput.value;
+        if (!query) return;
+        editor.value = editor.value.replaceAll(query, replaceInput.value);
+        pushHistory(editor.value);
+        performFind(false);
+        triggerAutoSave();
+        editor.focus();
+      });
+
+      replaceInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          document.getElementById('btn-replace').click();
+        } else if (e.key === 'Escape') {
+          toggleFindReplaceBar();
+        }
+      });
+
+      document.getElementById('btn-find-next').addEventListener('click', () => {
+        if (findMatches.length === 0) return;
+        currentMatchIndex = (currentMatchIndex + 1) % findMatches.length;
+        selectMatch(true, false);
+      });
+
+      document.getElementById('btn-find-prev').addEventListener('click', () => {
+        if (findMatches.length === 0) return;
+        currentMatchIndex = (currentMatchIndex - 1 + findMatches.length) % findMatches.length;
+        selectMatch(true, false);
+      });
+
       document.getElementById('btn-replace').addEventListener('click', () => {
         if (currentMatchIndex === -1 || findMatches.length === 0) return;
         const start = findMatches[currentMatchIndex];
         const queryLen = findInput.value.length;
         editor.value = editor.value.substring(0, start) + replaceInput.value + editor.value.substring(start + queryLen);
         pushHistory(editor.value);
-        renderMarkdown();
+        performFind(false);
         triggerAutoSave();
-        performFind();
       });
+
       document.getElementById('btn-replace-all').addEventListener('click', () => {
         const query = findInput.value;
         if (!query) return;
         editor.value = editor.value.replaceAll(query, replaceInput.value);
         pushHistory(editor.value);
-        renderMarkdown();
+        performFind(false);
         triggerAutoSave();
-        performFind();
       });
 
       function triggerDownload(filename, content, type) {
@@ -1830,6 +2029,9 @@ async function loadStorage() {
         pushHistory(editor.value);
         renderMarkdown();
         triggerAutoSave();
+        if (!findReplaceBar.classList.contains('d-none')) {
+          performFind(false);
+        }
       });
 
       document.getElementById('btn-new-file').addEventListener('click', createNewFile);
@@ -1841,9 +2043,7 @@ async function loadStorage() {
         }
         setViewMode('split');
         
-        // Step 1: Recover any data stuck in OPFS and move to IndexedDB securely
         await StorageEngine.migrateFromOPFS(); 
-
         await refreshFileList();
         
         const availableFiles = await StorageEngine.listFiles();
@@ -1854,5 +2054,5 @@ async function loadStorage() {
         await switchFile(activeFileName);
       });
     </script>
-  <script src="https://replit-cdn.com/replit-pill/replit-pill.global.js" data-referral-code="r1h5un0351j1" data-repl-id="438fc542-1f41-4c89-8e71-a01f72feb76c"></script></body>
+  </body>
 </html>
