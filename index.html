@@ -7,10 +7,9 @@
     <link rel="icon" type="image/svg" href="https://icons.getbootstrap.com/assets/icons/markdown-fill.svg">
     
     <meta property="og:title" content="HDMarkDown - Professional Markdown Workspace">
-    <meta property="og:description" content="A modern Markdown Live Workspace built with local OPFS file storage, live preview, find & replace, and export capabilities.">
+    <meta property="og:description" content="A modern Markdown Live Workspace built with robust local storage, live preview, find & replace, and export capabilities.">
     <meta property="og:type" content="website">
     <meta property="og:image" content="https://icons.getbootstrap.com/assets/icons/markdown-fill.svg">
-    <meta property="og:url" id="og-url" content="">
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -361,11 +360,11 @@
         border-radius: 8px;
         border: 1px solid var(--border-color);
         min-height: 250px;
-        resize: vertical; /* Allow resizing the diagram frame */
+        resize: vertical; 
       }
 
       .mermaid-container svg {
-        max-width: none !important; /* Ensure SVG pan/zoom works correctly without CSS constraints */
+        max-width: none !important; 
         width: 100%;
         height: 100%;
         cursor: grab;
@@ -637,8 +636,8 @@
         <div>
           <span id="word-count">0 words</span> | <span id="char-count">0 characters</span>
         </div>
-        <div class="d-flex align-items-center gap-1 text-warning opacity-75">
-          <i class="bi bi-hdd"></i> <span>Local Storage</span>
+        <div class="d-flex align-items-center gap-1 text-success opacity-75">
+          <i class="bi bi-database-check"></i> <span>IndexedDB Storage</span>
         </div>
       </footer>
     </div>
@@ -736,7 +735,7 @@
     </script>
 
     <script>
-      // Configure DOMPurify to allow embedded frames and videos
+      // Configure DOMPurify to allow embedded frames and videos safely
       DOMPurify.addHook('uponSanitizeElement', (node, data) => {
         if (data.tagName === 'iframe') {
           const src = node.getAttribute('src') || '';
@@ -747,58 +746,92 @@
       });
 
       class StorageEngine {
-        static async getRoot() {
-          if ('storage' in navigator && 'getDirectory' in navigator.storage) {
-            return await navigator.storage.getDirectory();
+        static dbName = 'HDMarkDownDB';
+        static storeName = 'files';
+        static dbPromise = null;
+
+        static init() {
+          if (!this.dbPromise) {
+            this.dbPromise = new Promise((resolve, reject) => {
+              const request = indexedDB.open(this.dbName, 1);
+              request.onupgradeneeded = (e) => {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains(this.storeName)) {
+                  db.createObjectStore(this.storeName);
+                }
+              };
+              request.onsuccess = () => resolve(request.result);
+              request.onerror = () => reject(request.error);
+            });
           }
-          throw new Error("OPFS is not supported in this browser environment.");
+          return this.dbPromise;
         }
+
         static async saveFile(filename, content) {
           try {
-            const root = await this.getRoot();
-            const handle = await root.getFileHandle(filename, { create: true });
-            const writable = await handle.createWritable();
-            await writable.write(content);
-            await writable.close();
-          } catch (err) {
-            console.error("OPFS Save Error:", err);
+            const db = await this.init();
+            return new Promise((resolve, reject) => {
+              const tx = db.transaction(this.storeName, 'readwrite');
+              tx.objectStore(this.storeName).put(content, filename);
+              tx.oncomplete = () => resolve();
+              tx.onerror = () => reject(tx.error);
+            });
+          } catch (e) {
+            console.error("IndexedDB Save Error:", e);
           }
         }
+
         static async readFile(filename) {
           try {
-            const root = await this.getRoot();
-            const handle = await root.getFileHandle(filename);
-            const file = await handle.getFile();
-            return await file.text();
-          } catch (err) {
+            const db = await this.init();
+            return new Promise((resolve, reject) => {
+              const tx = db.transaction(this.storeName, 'readonly');
+              const request = tx.objectStore(this.storeName).get(filename);
+              request.onsuccess = () => resolve(request.result !== undefined ? request.result : null);
+              request.onerror = () => reject(tx.error);
+            });
+          } catch (e) {
+            console.error("IndexedDB Read Error:", e);
             return null;
           }
         }
+
         static async listFiles() {
           try {
-            const root = await this.getRoot();
-            const files = [];
-            for await (const entry of root.values()) {
-              if (entry.kind === 'file' && entry.name !== '.metadata.json') {
-                files.push(entry.name);
-              }
-            }
-            return files;
-          } catch (err) {
+            const db = await this.init();
+            return new Promise((resolve, reject) => {
+              const tx = db.transaction(this.storeName, 'readonly');
+              const request = tx.objectStore(this.storeName).getAllKeys();
+              request.onsuccess = () => {
+                // Hide metadata files from user listing
+                resolve(request.result.filter(k => k !== '.metadata.json' && k !== '.opfs_migrated'));
+              };
+              request.onerror = () => reject(tx.error);
+            });
+          } catch (e) {
+            console.error("IndexedDB List Error:", e);
             return [];
           }
         }
+
         static async deleteFile(filename) {
           try {
-            const root = await this.getRoot();
-            await root.removeEntry(filename);
-          } catch (err) {
-            console.error("OPFS Delete Error:", err);
+            const db = await this.init();
+            return new Promise((resolve, reject) => {
+              const tx = db.transaction(this.storeName, 'readwrite');
+              tx.objectStore(this.storeName).delete(filename);
+              tx.oncomplete = () => resolve();
+              tx.onerror = () => reject(tx.error);
+            });
+          } catch (e) {
+            console.error("IndexedDB Delete Error:", e);
           }
         }
+
         static async saveMetadata(metadata) {
           await this.saveFile('.metadata.json', JSON.stringify(metadata));
         }
+
         static async readMetadata() {
           const content = await this.readFile('.metadata.json');
           if (!content) return {};
@@ -808,11 +841,39 @@
             return {};
           }
         }
+
+        static async migrateFromOPFS() {
+          try {
+            const migrated = await this.readFile('.opfs_migrated');
+            if (migrated) return; // Already migrated
+
+            if (!('storage' in navigator && 'getDirectory' in navigator.storage)) return;
+            const root = await navigator.storage.getDirectory();
+            
+            for await (const entry of root.values()) {
+              if (entry.kind === 'file') {
+                try {
+                  const fileHandle = await root.getFileHandle(entry.name);
+                  const file = await fileHandle.getFile();
+                  const content = await file.text();
+                  if (content) {
+                    await this.saveFile(entry.name, content);
+                  }
+                } catch(e) {
+                   console.warn("Failed migrating single OPFS file:", e);
+                }
+              }
+            }
+            await this.saveFile('.opfs_migrated', 'true');
+          } catch (e) {
+            console.warn("OPFS migration skipped or failed (Likely due to environment restrictions):", e);
+          }
+        }
       }
 
       const initialMarkdown = `# Welcome to HDMarkDown
 
-A modern **Markdown Live Workspace** built with local **OPFS** file storage, **Find & Replace**, and **JSON Export**.
+A modern **Markdown Live Workspace**, **Find & Replace**, and **JSON Export**.
 
 ---
 
@@ -841,8 +902,8 @@ graph TD;
 ### Code Support
 \`\`\`javascript
 async function loadStorage() {
-  const root = await navigator.storage.getDirectory();
-  console.log("OPFS Loaded successfully!");
+  const db = await StorageEngine.init();
+  console.log("IndexedDB Loaded successfully!");
 }
 \`\`\`
 `;
@@ -875,7 +936,6 @@ async function loadStorage() {
         gfm: true,
         breaks: true,
         highlight: function(code, lang) {
-          // Skip highlighting for mermaid, let mermaid handle it
           if (lang === 'mermaid') return code;
           const language = hljs.getLanguage(lang) ? lang : 'plaintext';
           return hljs.highlight(code, { language }).value;
@@ -902,6 +962,31 @@ async function loadStorage() {
       };
       marked.use({ extensions: [youtubeExtension] });
 
+      // Decoupled Auto-Save function - ONLY called when text is intentionally modified!
+      function triggerAutoSave() {
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(async () => {
+          if (!activeFileName) return;
+          const text = editor.value;
+          await StorageEngine.saveFile(activeFileName, text);
+          if (appMetadata[activeFileName]) {
+            appMetadata[activeFileName].modified = Date.now();
+            await StorageEngine.saveMetadata(appMetadata);
+          }
+        }, 500);
+      }
+
+      // Fallback save on tab close / visibility change
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden' && activeFileName) {
+          StorageEngine.saveFile(activeFileName, editor.value);
+          if (appMetadata[activeFileName]) {
+            appMetadata[activeFileName].modified = Date.now();
+            StorageEngine.saveMetadata(appMetadata);
+          }
+        }
+      });
+
       function pushHistory(val) {
         if (isUndoRedoAction) return;
         if (historyIndex >= 0 && historyStack[historyIndex] === val) return;
@@ -917,6 +1002,7 @@ async function loadStorage() {
           historyIndex--;
           editor.value = historyStack[historyIndex];
           renderMarkdown();
+          triggerAutoSave();
           isUndoRedoAction = false;
         }
       }
@@ -927,6 +1013,7 @@ async function loadStorage() {
           historyIndex++;
           editor.value = historyStack[historyIndex];
           renderMarkdown();
+          triggerAutoSave();
           isUndoRedoAction = false;
         }
       }
@@ -953,7 +1040,6 @@ async function loadStorage() {
         `;
         container.appendChild(controls);
 
-        // Normalize SVG sizing for zooming
         let vb = svg.getAttribute('viewBox');
         let x = 0, y = 0, w = 1000, h = 1000;
         
@@ -970,7 +1056,6 @@ async function loadStorage() {
         
         const origX = x, origY = y, origW = w, origH = h;
 
-        // Override mermaid injected inline styles to use fluid scaling
         svg.style.maxWidth = 'none';
         svg.removeAttribute('width');
         svg.removeAttribute('height');
@@ -995,7 +1080,6 @@ async function loadStorage() {
           updateViewBox();
         };
 
-        // Event Listeners for controls
         controls.querySelector('.pan-up').addEventListener('click', () => pan(0, -50));
         controls.querySelector('.pan-down').addEventListener('click', () => pan(0, 50));
         controls.querySelector('.pan-left').addEventListener('click', () => pan(-50, 0));
@@ -1007,7 +1091,6 @@ async function loadStorage() {
           updateViewBox();
         });
 
-        // Mouse Drag / Touch Drag Panning (Pointer Events)
         let isDragging = false;
         let lastMouseX, lastMouseY;
 
@@ -1032,7 +1115,6 @@ async function loadStorage() {
           svg.releasePointerCapture(e.pointerId);
         });
 
-        // Scroll Wheel Zooming
         container.addEventListener('wheel', (e) => {
           e.preventDefault(); 
           const rect = container.getBoundingClientRect();
@@ -1053,14 +1135,12 @@ async function loadStorage() {
         
         preview.innerHTML = cleanHTML;
         
-        // Code Highlights (skipping mermaid)
         preview.querySelectorAll('pre code').forEach(block => {
           if (!block.classList.contains('language-mermaid')) {
              hljs.highlightElement(block);
           }
         });
         
-        // Render Mermaid Diagrams and initialize Pan/Zoom Controls
         if (window.mermaid) {
           const mermaidBlocks = preview.querySelectorAll('code.language-mermaid');
           for (let i = 0; i < mermaidBlocks.length; i++) {
@@ -1074,7 +1154,7 @@ async function loadStorage() {
               div.className = 'mermaid-container shadow-sm';
               div.innerHTML = svg;
               pre.replaceWith(div);
-              initMermaidPanZoom(div); // Attach controls
+              initMermaidPanZoom(div); 
             } catch (e) {
               const pre = block.parentElement;
               pre.innerHTML = `<div class="text-danger p-2 mb-2 bg-dark border border-danger rounded" style="font-size: 0.8rem">Mermaid Syntax Error</div><pre><code>${code}</code></pre>`;
@@ -1084,16 +1164,6 @@ async function loadStorage() {
         
         generateTOC();
         updateMetrics(markdownText);
-        
-        // Auto-Save
-        clearTimeout(saveTimeout);
-        saveTimeout = setTimeout(async () => {
-          await StorageEngine.saveFile(activeFileName, markdownText);
-          if (appMetadata[activeFileName]) {
-            appMetadata[activeFileName].modified = Date.now();
-            await StorageEngine.saveMetadata(appMetadata);
-          }
-        }, 300);
       }
 
       window.addEventListener('mermaidLoaded', () => {
@@ -1308,7 +1378,10 @@ async function loadStorage() {
         historyStack.length = 0;
         historyIndex = -1;
         pushHistory(editor.value);
-        renderMarkdown();
+        
+        // Render Markdown immediately to show UI but DO NOT trigger auto-save 
+        // to prevent overwriting files if the read operation was slow or failed
+        renderMarkdown(); 
         refreshFileList();
 
         const mobileSidebarEl = document.getElementById('mobileSidebar');
@@ -1468,12 +1541,10 @@ async function loadStorage() {
         
         presentationContent.innerHTML = cleanHTML;
 
-        // Apply Highlights
         presentationContent.querySelectorAll('pre code').forEach(block => {
           if (!block.classList.contains('language-mermaid')) hljs.highlightElement(block);
         });
 
-        // Apply Mermaid logic for Slides too
         if (window.mermaid) {
           const mermaidBlocks = presentationContent.querySelectorAll('code.language-mermaid');
           for (let i = 0; i < mermaidBlocks.length; i++) {
@@ -1487,7 +1558,7 @@ async function loadStorage() {
               div.className = 'mermaid-container';
               div.innerHTML = svg;
               pre.replaceWith(div);
-              initMermaidPanZoom(div); // Attach pan/zoom to slide diagrams
+              initMermaidPanZoom(div); 
             } catch (e) {
               const pre = block.parentElement;
               pre.innerHTML = `<div class="text-danger p-2 mb-2 bg-dark border border-danger rounded" style="font-size: 0.8rem">Mermaid Syntax Error</div><pre><code>${code}</code></pre>`;
@@ -1495,7 +1566,6 @@ async function loadStorage() {
           }
         }
 
-        // Update Nav UI
         document.getElementById('slide-indicator').textContent = `${currentSlideIndex + 1} / ${presentationSlides.length}`;
         const progressPercentage = ((currentSlideIndex + 1) / presentationSlides.length) * 100;
         document.getElementById('presentation-progress').style.width = `${progressPercentage}%`;
@@ -1532,7 +1602,6 @@ async function loadStorage() {
             prevSlide();
           }
         } else {
-          // Standard editor keys
           if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
             e.preventDefault();
             e.shiftKey ? redo() : undo();
@@ -1579,6 +1648,7 @@ async function loadStorage() {
         editor.setSelectionRange(start + before.length, start + before.length + insertion.length);
         pushHistory(editor.value);
         renderMarkdown();
+        triggerAutoSave();
       }
 
       const findReplaceBar = document.getElementById('find-replace-bar');
@@ -1639,6 +1709,7 @@ async function loadStorage() {
         editor.value = editor.value.substring(0, start) + replaceInput.value + editor.value.substring(start + queryLen);
         pushHistory(editor.value);
         renderMarkdown();
+        triggerAutoSave();
         performFind();
       });
       document.getElementById('btn-replace-all').addEventListener('click', () => {
@@ -1647,6 +1718,7 @@ async function loadStorage() {
         editor.value = editor.value.replaceAll(query, replaceInput.value);
         pushHistory(editor.value);
         renderMarkdown();
+        triggerAutoSave();
         performFind();
       });
 
@@ -1757,6 +1829,7 @@ async function loadStorage() {
       editor.addEventListener('input', () => {
         pushHistory(editor.value);
         renderMarkdown();
+        triggerAutoSave();
       });
 
       document.getElementById('btn-new-file').addEventListener('click', createNewFile);
@@ -1767,6 +1840,10 @@ async function loadStorage() {
           desktopSidebar.classList.add('collapsed');
         }
         setViewMode('split');
+        
+        // Step 1: Recover any data stuck in OPFS and move to IndexedDB securely
+        await StorageEngine.migrateFromOPFS(); 
+
         await refreshFileList();
         
         const availableFiles = await StorageEngine.listFiles();
